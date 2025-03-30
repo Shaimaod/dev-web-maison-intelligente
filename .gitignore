@@ -1,0 +1,18 @@
+# Ignorer les dépendances PHP et Node.js
+/vendor
+/node_modules
+
+# Ignorer les fichiers temporaires générés par Laravel
+/public/storage
+/storage/*.key
+
+# Ignorer les fichiers de log
+/storage/logs/*
+
+# Ignorer les fichiers compilés de l'éditeur (par exemple, VSCode, Sublime Text)
+.vscode/
+.idea/
+
+# Ignorer les fichiers de système d'exploitation
+.DS_Store   # macOS
+Thumbs.db   # Windows

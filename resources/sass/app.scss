@@ -1,0 +1,8 @@
+// Placez d'abord les @use
+@use 'bootstrap/scss/bootstrap' as *;
+@use 'variables' as *;
+
+// Vos autres règles CSS viennent ensuite
+body {
+    background-color: #ff6347;
+}
