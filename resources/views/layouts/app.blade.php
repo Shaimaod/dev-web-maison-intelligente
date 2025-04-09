@@ -68,6 +68,10 @@
                                         {{ __('Dashboard') }}
                                     </a>
 
+                                    <a class="dropdown-item" href="{{ route('profile.show') }}">
+                                        {{ __('Profile') }}
+                                    </a>
+
                                     <!-- Logout option -->
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();

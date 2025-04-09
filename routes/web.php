@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthorizedUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Middleware\RedirectIfAuthenticated;
 
 /*
@@ -36,7 +37,15 @@ Route::get('/', function () {
 */
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
+
+    // Route pour accéder à la page freetour
     Route::get('/freetour', [ConnectedObjectController::class, 'index'])->name('freetour');
+    
+    // Route pour récupérer les objets filtrés via l'API
+    Route::get('/get-objects', [ConnectedObjectController::class, 'getObjects'])->name('getObjects');  // Recherche des objets filtrés
+
+    // Route pour accéder à la page dashboard.connected
+    Route::get('/dashboard.connected', [ConnectedObjectController::class, 'dashboardConnected'])->name('dashboard.connected');  // Nouvelle méthode pour afficher dashboard
 });
 
 /*
@@ -49,8 +58,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware([RedirectIfAuthenticated::class])->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+
+    // Les routes 'freetour' et 'dashboard.connected' sont disponibles aussi sans authentification
     Route::get('/freetour', [ConnectedObjectController::class, 'index'])->name('freetour');
-    Route::get('/dashboard.connected', [HomeController::class, 'index'])->name('dashboard.connected');
+    Route::get('/dashboard.connected', [ConnectedObjectController::class, 'dashboardConnected'])->name('dashboard.connected');
 });
 
 /*
@@ -104,3 +115,20 @@ Route::get('email/verify/{id}/{hash}', function ($id, $hash) {
     // Si le hash ne correspond pas, rediriger vers la page de connexion
     return redirect('/login')->with('error', 'Lien de vérification invalide.');
 })->middleware(['auth', 'signed'])->name('verification.verify');
+
+/*
+|--------------------------------------------------------------------------
+| Routes Profil
+|--------------------------------------------------------------------------
+| Routes pour afficher et mettre à jour le profil de l'utilisateur.
+*/
+Route::middleware(['auth'])->group(function () {
+    // Afficher le profil de l'utilisateur
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    
+    // Mettre à jour le profil de l'utilisateur
+    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+});
+
+// Ajouter la route pour la nouvelle page
+Route::get('/connected-objects', [ConnectedObjectController::class, 'showConnectedObjects'])->name('connected.objects');

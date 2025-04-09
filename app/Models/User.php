@@ -56,4 +56,19 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->role === 'admin'; // If you are using a 'role' column
     }
+
+    public function updateLevel()
+    {
+        if ($this->points >= 0 && $this->points < 10) {
+            $this->level = 'débutant';
+        } elseif ($this->points >= 10 && $this->points < 20) {
+            $this->level = 'intermédiaire';
+        } elseif ($this->points >= 20 && $this->points < 30) {
+            $this->level = 'avancé';
+        } else {
+            $this->level = 'expert';
+        }
+
+        $this->save();
+    }
 }

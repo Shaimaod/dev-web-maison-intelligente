@@ -8,5 +8,11 @@
     <!-- Exemple de contenu supplémentaire -->
     <p>Utilisez vos objets connectés, gérez vos paramètres, etc.</p>
 
+    <!-- Bouton pour accéder à la page de recherche des objets -->
+    <div class="mt-4">
+        <a href="{{ route('connected.objects') }}" class="btn btn-primary">
+            Rechercher des Objets Connectés
+        </a>
+    </div>
 </div>
 @endsection

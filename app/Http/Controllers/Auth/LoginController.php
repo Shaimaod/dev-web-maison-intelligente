@@ -64,6 +64,15 @@ class LoginController extends Controller
                 ]);
             }
 
+            // Ajouter des points d'expérience à chaque connexion
+            $user->points += 1;  // Ajouter 1 point pour chaque connexion (vous pouvez ajuster cela)
+            
+            // Mettre à jour le niveau de l'utilisateur
+            $user->updateLevel();  // Mettre à jour le niveau en fonction des points
+
+            // Sauvegarder l'utilisateur avec les nouveaux points et le niveau mis à jour
+            $user->save();
+
             // Si l'email est vérifié, on redirige vers le tableau de bord connecté
             return redirect()->intended(route('dashboard.connected'));
         }
