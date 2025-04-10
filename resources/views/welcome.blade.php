@@ -1,60 +1,63 @@
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maison Connectée</title>
-    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-    <!-- Bootstrap CSS via CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+@extends('layouts.app')
 
-    <!-- Vue.js & app.js -->
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
-</head>
-
-<body>
-    <div id="app">
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="#">Maison Connectée</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/">Accueil</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/freetour">Freetour</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">Connexion</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('register') }}">Inscription</a>
-                        </li>
-                    </ul>
+@section('content')
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="mb-0">Bienvenue sur Maison Connectée</h1>
+                </div>
+                <div class="card-body">
+                    <p class="lead mb-4">Gérez tous vos objets connectés depuis une seule interface</p>
+                    <div class="d-grid gap-3">
+                        <a href="{{ route('register') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Créer un compte
+                        </a>
+                        <a href="{{ route('login') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                        </a>
+                    </div>
                 </div>
             </div>
-        </nav>
+        </div>
+    </div>
+</div>
 
-        <!-- Hero Section (centré) -->
-        <div class="hero-section d-flex justify-content-center align-items-center" style="height: 100vh; background-color: #f8f9fa;">
-            <div class="text-center">
-                <h1>Bienvenue sur Maison Connectée</h1>
-                <p>Gérez vos objets connectés, surveillez votre consommation d'énergie et plus encore, directement depuis cette plateforme.</p>
-                <a href="{{ route('login') }}" class="btn btn-primary btn-lg">Commencer</a>
+<div class="container">
+    <div class="features-section py-5">
+        <h2 class="text-center mb-5">Nos fonctionnalités</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <i class="fas fa-plug feature-icon"></i>
+                    <h3>Gestion centralisée</h3>
+                    <p>Contrôlez tous vos objets connectés depuis une seule interface intuitive.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <i class="fas fa-chart-line feature-icon"></i>
+                    <h3>Suivi en temps réel</h3>
+                    <p>Visualisez l'état et les performances de vos appareils en temps réel.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt feature-icon"></i>
+                    <h3>Sécurité renforcée</h3>
+                    <p>Protégez votre maison avec des fonctionnalités de sécurité avancées.</p>
+                </div>
             </div>
         </div>
-
     </div>
 
-    <!-- Bootstrap JS & Popper.js via CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
-
-    <!-- Vue.js and app.js -->
-    @vite(['resources/js/app.js'])
-</body>
-
-</html>
+    <div class="cta-section text-center py-5">
+        <h2>Prêt à commencer ?</h2>
+        <p class="lead">Rejoignez notre communauté et transformez votre maison en maison connectée.</p>
+        <a href="{{ route('register') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-rocket me-2"></i>Commencer maintenant
+        </a>
+    </div>
+</div>
+@endsection

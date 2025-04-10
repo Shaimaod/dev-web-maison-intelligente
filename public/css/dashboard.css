@@ -1,0 +1,44 @@
+.object-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.object-card:hover {
+    transform: translateY(-5px);
+}
+
+.object-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.object-info {
+    padding: 15px;
+}
+
+.object-info h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.object-info p {
+    margin: 0 0 10px 0;
+    color: #666;
+}
+
+.object-details {
+    display: flex;
+    gap: 10px;
+}
+
+.category, .room {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    background: #f0f0f0;
+    color: #666;
+} 

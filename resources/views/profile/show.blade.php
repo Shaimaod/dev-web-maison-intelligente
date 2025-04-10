@@ -1,112 +1,131 @@
-@extends('layouts.app')
+@extends('layouts.user')
+
+@section('title', 'Mon profil')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-lg">
-                <div class="card-header text-center bg-primary text-white">
-                    <h3>Mon Profil</h3>
+<div class="container py-4">
+    <div class="row">
+        <!-- Colonne de gauche - Informations du profil -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <div class="position-relative d-inline-block mb-3">
+                        @if($user->photo)
+                            <img src="{{ asset('storage/' . $user->photo) }}" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                        @else
+                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                                <i class="fas fa-user fa-3x text-white"></i>
+                            </div>
+                        @endif
+                        <button class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle" style="width: 40px; height: 40px;" onclick="document.getElementById('photo').click()">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </div>
+                    <h4 class="mb-1">{{ $user->name }}</h4>
+                    <p class="text-muted mb-3">{{ $user->email }}</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <span class="badge bg-primary">{{ ucfirst($user->level) }}</span>
+                        <span class="badge bg-success">{{ $user->points }} points</span>
+                    </div>
                 </div>
+            </div>
 
+            <!-- Statistiques -->
+            <div class="card mb-4">
                 <div class="card-body">
-                    <!-- Affichage des messages de succès ou d'erreur -->
-                    @if (session('status'))
-                        <div class="alert alert-success">
+                    <h5 class="card-title mb-3">Statistiques</h5>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Objets connectés</span>
+                            <span class="fw-bold">{{ $user->connectedObjects->count() }}</span>
+                        </div>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar" style="width: {{ min(($user->connectedObjects->count() / 10) * 100, 100) }}%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Activité</span>
+                            <span class="fw-bold">{{ $user->activityLogs->count() }}</span>
+                        </div>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar bg-success" style="width: {{ min(($user->activityLogs->count() / 50) * 100, 100) }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne de droite - Formulaire de modification -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Modifier le profil</h5>
+                </div>
+                <div class="card-body">
+                    @if(session('status'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
                             {{ session('status') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     @endif
 
-                    <!-- Affichage du niveau et de la barre d'expérience -->
-                    <div class="mb-4">
-                        <h5>Niveau actuel : <strong>{{ ucfirst($user->level) }}</strong></h5>
-                        <p>Points d'expérience : <strong>{{ $user->points }}</strong></p>
-
-                        <!-- Définir les seuils des niveaux -->
-                        @php
-                            // Définir les seuils des niveaux
-                            $nextLevelThresholds = [
-                                'beginner' => 10,       // Débutant : 10 points max
-                                'intermediate' => 20,   // Intermédiaire : 20 points max
-                                'advanced' => 30,      // Avancé : 30 points max
-                                'expert' => 30,        // Expert : 30 points (pas de progression après)
-                            ];
-
-                            // Déterminer le niveau actuel de l'utilisateur
-                            $level = 'beginner';
-                            if ($user->points > 10) {
-                                $level = 'intermediate';
-                            }
-                            if ($user->points > 20) {
-                                $level = 'advanced';
-                            }
-                            if ($user->points > 30) {
-                                $level = 'expert';
-                            }
-
-                            // Calcul de la progression vers le niveau suivant
-                            $nextLevelPoints = $nextLevelThresholds[$level];
-                            $progress = min($user->points, $nextLevelPoints); // Calculer les points utilisés pour la barre
-                            $progressPercent = ($progress / $nextLevelPoints) * 100; // Calculer la largeur de la barre
-                        @endphp
-
-                        <!-- Afficher la barre d'expérience -->
-                        <div class="progress">
-                            <div class="progress-bar" role="progressbar" style="width: {{ $progressPercent }}%" aria-valuenow="{{ $user->points }}" aria-valuemin="0" aria-valuemax="{{ $nextLevelPoints }}"></div>
-                        </div>
-
-                        <p>Progression vers le niveau suivant : <strong>{{ $nextLevelPoints - $user->points }} points restants</strong></p>
-                    </div>
-
-                    <!-- Formulaire de modification du profil -->
-                    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
                         @csrf
-                        <div class="form-group">
-                            <div class="d-flex align-items-center mb-3">
-                                <!-- Affichage de la photo actuelle si elle existe -->
-                                @if ($user->photo)
-                                    <img src="{{ asset('storage/' . $user->photo) }}" alt="Photo de profil" class="img-thumbnail" style="width: 100px; height: 100px; border-radius: 50%; margin-right: 20px;">
-                                @else
-                                    <span class="text-muted">Aucune photo</span>
-                                @endif
+                        <input type="file" id="photo" name="photo" class="d-none" onchange="previewImage(this)">
 
-                                <label for="photo" class="font-weight-bold mr-3" style="min-width: 150px;">Photo de profil :</label>
-                                <input type="file" class="form-control-file" id="photo" name="photo">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Nom</label>
+                                <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $user->name) }}" required>
+                                @error('name')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label for="surname" class="form-label">Prénom</label>
+                                <input type="text" class="form-control @error('surname') is-invalid @enderror" id="surname" name="surname" value="{{ old('surname', $user->surname) }}" required>
+                                @error('surname')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="name" class="font-weight-bold">Nom :</label>
-                            <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $user->name) }}" required>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Nom d'utilisateur</label>
+                            <input type="text" class="form-control @error('username') is-invalid @enderror" id="username" name="username" value="{{ old('username', $user->username) }}" required>
+                            @error('username')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
                         </div>
 
-                        <div class="form-group">
-                            <label for="surname" class="font-weight-bold">Prénom :</label>
-                            <input type="text" class="form-control" id="surname" name="surname" value="{{ old('surname', $user->surname) }}" required>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Adresse e-mail</label>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $user->email) }}" required>
+                            @error('email')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
                         </div>
 
-                        <div class="form-group">
-                            <label for="username" class="font-weight-bold">Nom d'utilisateur :</label>
-                            <input type="text" class="form-control" id="username" name="username" value="{{ old('username', $user->username) }}" required>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Nouveau mot de passe</label>
+                            <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password">
+                            @error('password')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                            <div class="form-text">Laissez vide pour ne pas changer le mot de passe</div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="email" class="font-weight-bold">Adresse e-mail :</label>
-                            <input type="email" class="form-control" id="email" name="email" value="{{ old('email', $user->email) }}" required>
+                        <div class="mb-3">
+                            <label for="password_confirmation" class="form-label">Confirmer le mot de passe</label>
+                            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation">
                         </div>
 
-                        <!-- Champ pour modifier le mot de passe -->
-                        <div class="form-group">
-                            <label for="password" class="font-weight-bold">Nouveau mot de passe :</label>
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Laissez vide si vous ne voulez pas changer">
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Enregistrer les modifications
+                            </button>
                         </div>
-
-                        <div class="form-group">
-                            <label for="password_confirmation" class="font-weight-bold">Confirmer le mot de passe :</label>
-                            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" placeholder="Confirmer le nouveau mot de passe">
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-block mt-4">Mettre à jour</button>
                     </form>
                 </div>
             </div>
@@ -114,3 +133,18 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.querySelector('.rounded-circle');
+            img.src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+@endpush

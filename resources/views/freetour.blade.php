@@ -1,85 +1,209 @@
-<!DOCTYPE html>
-<html lang="fr">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Freetour - Maison Connectée</title>
-    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    @vite(['resources/js/app.js'])  <!-- Assurez-vous que Vue.js est inclus -->
-</head>
+@section('content')
+<link href="{{ asset('css/freetour.css') }}" rel="stylesheet">
 
-<body>
-    <div id="app">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="#">Maison Connectée</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/">Accueil</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/freetour">Freetour</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">Connexion</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('register') }}">Inscription</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Hero Section -->
-        <div class="container mt-5">
-            <h1>Bienvenue sur Freetour</h1>
-            <p>Rechercher des objets connectés :</p>
-
-            <!-- Barre de recherche en temps réel -->
-            <div class="mb-3">
-                <input v-model="query" @input="fetchObjects" type="text" class="form-control" placeholder="Rechercher un objet">
-            </div>
-
-            <!-- Filtres -->
-            <div class="mb-3">
-                <select v-model="category" @change="fetchObjects" class="form-control">
-                    <option value="">Sélectionner une catégorie</option>
-                    <option value="Éclairage">Éclairage</option>
-                    <option value="Climatisation">Climatisation</option>
-                    <option value="Sécurité">Sécurité</option>
-                    <option value="Électroménager">Électroménager</option>
-                    <option value="Audio">Audio</option>
-                </select>
-            </div>
-
-            <!-- Affichage des objets -->
-            <div class="mt-4">
-                <h4>Résultats :</h4>
-                <!-- Utilisation de Vue.js pour afficher dynamiquement les objets -->
-                <ul>
-                    <li v-for="object in objects" :key="object.id">
-                        <!-- Vue.js va gérer l'affichage des objets -->
-                        <span v-text="object.name"></span> - 
-                        <span v-text="object.description"></span> (
-                        <span v-text="object.category"></span>)
-                    </li>
-                </ul>
-                <p v-if="objects.length === 0">Aucun objet trouvé.</p>
-            </div>
+<div id="freetour-app">
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Découvrez nos Objets Connectés</h1>
+            <p class="hero-subtitle">Explorez notre catalogue d'objets connectés et trouvez ceux qui correspondent à vos besoins</p>
         </div>
     </div>
 
-    <!-- Bootstrap JS & Popper.js via CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <div class="container">
+        <div class="search-section">
+            <div class="row">
+                <div class="col-md-4">
+                    <select class="search-input" v-model="category" @change="fetchObjects">
+                        <option value="">Toutes les catégories</option>
+                        <option value="Éclairage">Éclairage</option>
+                        <option value="Climatisation">Climatisation</option>
+                        <option value="Sécurité">Sécurité</option>
+                        <option value="Électroménager">Électroménager</option>
+                        <option value="Audio">Audio</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <input type="text" 
+                           class="search-input" 
+                           v-model="query" 
+                           @input="fetchObjects"
+                           placeholder="Rechercher un objet...">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100" @click="fetchObjects">
+                        <i class="fas fa-search me-2"></i>Rechercher
+                    </button>
+                </div>
+            </div>
+        </div>
 
-</body>
+        <div v-if="loading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+        </div>
 
-</html>
+        <div v-else-if="objects.length === 0" class="text-center py-5">
+            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+            <h4>Aucun objet trouvé</h4>
+            <p class="text-muted">Essayez de modifier vos critères de recherche</p>
+        </div>
+
+        <div v-else class="object-grid">
+            <div v-for="object in objects" :key="object.id" class="object-card">
+                <div class="object-image-container">
+                    <img v-if="object.photo" :src="'/storage/' + object.photo" :alt="object.name" class="object-image">
+                    <div v-else class="default-image">
+                        <i class="fas fa-plug fa-3x"></i>
+                    </div>
+                </div>
+                <div class="object-info">
+                    <h4 class="object-title">@{{ object.name }}</h4>
+                    <p class="object-category">@{{ object.category }}</p>
+                    <p>@{{ object.description }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge" :class="object.status === 'Actif' ? 'bg-success' : 'bg-danger'">
+                            @{{ object.status }}
+                        </span>
+                        <a :href="'/object/' + object.id" class="btn btn-primary">
+                            <i class="fas fa-info-circle me-2"></i>Détails
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="lastPage > 1" class="d-flex justify-content-center mt-4">
+            <nav aria-label="Pagination">
+                <ul class="pagination">
+                    <li class="page-item" :class="{ disabled: currentPage <= 1 }">
+                        <a class="page-link" href="#" @click.prevent="prevPage">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <span class="page-link">Page @{{ currentPage }} sur @{{ lastPage }}</span>
+                    </li>
+                    <li class="page-item" :class="{ disabled: currentPage >= lastPage }">
+                        <a class="page-link" href="#" @click.prevent="nextPage">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<style>
+.object-image-container {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+}
+
+.object-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.default-image {
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+</style>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Vérifier que Vue est disponible
+    if (typeof window.Vue === 'undefined') {
+        console.error('Vue.js n\'est pas chargé');
+        return;
+    }
+
+    const app = window.Vue.createApp({
+        data() {
+            return {
+                objects: [],
+                query: '',
+                category: '',
+                currentPage: 1,
+                lastPage: 1,
+                loading: false
+            }
+        },
+        methods: {
+            async fetchObjects() {
+                console.log('Début de fetchObjects');
+                this.loading = true;
+                try {
+                    const params = new URLSearchParams({
+                        page: this.currentPage,
+                        query: this.query,
+                        category: this.category
+                    });
+
+                    console.log('Envoi de la requête à /api/objects avec les paramètres:', params.toString());
+                    const response = await fetch(`/api/objects?${params.toString()}`);
+                    console.log('Réponse reçue', response);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('Données reçues', data);
+                    
+                    this.objects = data.data;
+                    this.currentPage = data.current_page;
+                    this.lastPage = data.last_page;
+                } catch (error) {
+                    console.error('Erreur lors de la récupération des objets:', error);
+                } finally {
+                    this.loading = false;
+                }
+            },
+            prevPage() {
+                if (this.currentPage > 1) {
+                    this.currentPage--;
+                    this.fetchObjects();
+                }
+            },
+            nextPage() {
+                if (this.currentPage < this.lastPage) {
+                    this.currentPage++;
+                    this.fetchObjects();
+                }
+            }
+        },
+        mounted() {
+            console.log('Vue app mounted');
+            this.fetchObjects();
+        }
+    });
+
+    // Vérifier si l'élément existe avant de monter l'application
+    const appElement = document.getElementById('freetour-app');
+    if (appElement) {
+        console.log('Mounting Vue app to #freetour-app');
+        app.mount('#freetour-app');
+    } else {
+        console.error('Element #freetour-app not found');
+    }
+});
+</script>
+@endpush
+@endsection

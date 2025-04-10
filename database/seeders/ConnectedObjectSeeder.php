@@ -2,86 +2,114 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\ConnectedObject;
+use App\Models\House;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class ConnectedObjectSeeder extends Seeder
 {
     public function run()
     {
-        ConnectedObject::create([
-            'name' => 'Lampe Connectée',
-            'description' => 'Une lampe connectée que vous pouvez contrôler via votre téléphone.',
-            'category' => 'Éclairage',
-            'brand' => 'Philips',
-            'type' => 'Lampe',
-            'status' => 'Actif',
-            'connectivity' => 'Wi-Fi',
-            'battery' => 'N/A',
-            'mode' => 'Automatique',
-            'current_temp' => null,
-            'target_temp' => null,
-            'last_interaction' => 'Aujourd\'hui, 10:00 AM',
-        ]);
+        $house = House::first();
 
-        ConnectedObject::create([
-            'name' => 'Thermostat Intelligent',
-            'description' => 'Un thermostat pour réguler la température de votre maison.',
-            'category' => 'Climatisation',
-            'brand' => 'Nest',
-            'type' => 'Thermostat',
-            'status' => 'Actif',
-            'connectivity' => 'Wi-Fi',
-            'battery' => '65%',
-            'mode' => 'Automatique',
-            'current_temp' => '21°C',
-            'target_temp' => '23°C',
-            'last_interaction' => 'Aujourd\'hui, 11:15 AM',
-        ]);
+        if (!$house) {
+            $house = House::create([
+                'name' => 'Maison Connectée',
+                'address' => '123 Rue de la Technologie, 75000 Paris',
+                'description' => 'La maison connectée par défaut du système'
+            ]);
+        }
 
-        ConnectedObject::create([
-            'name' => 'Caméra de Sécurité',
-            'description' => 'Une caméra connectée pour surveiller votre maison à distance.',
-            'category' => 'Sécurité',
-            'brand' => 'Arlo',
-            'type' => 'Caméra',
-            'status' => 'Actif',
-            'connectivity' => 'Wi-Fi',
-            'battery' => '78%',
-            'mode' => 'Surveillance',
-            'current_temp' => null,
-            'target_temp' => null,
-            'last_interaction' => 'Aujourd\'hui, 09:30 AM',
-        ]);
+        $admin = User::where('email', 'admin@maisonconnectee.com')->first();
 
-        ConnectedObject::create([
-            'name' => 'Prise Intelligente',
-            'description' => 'Contrôlez vos appareils électriques à distance avec une prise connectée.',
-            'category' => 'Électroménager',
-            'brand' => 'TP-Link',
-            'type' => 'Prise',
-            'status' => 'Inactif',
-            'connectivity' => 'Bluetooth',
-            'battery' => 'N/A',
-            'mode' => 'Manuel',
-            'current_temp' => null,
-            'target_temp' => null,
-            'last_interaction' => 'Hier, 18:45',
-        ]);
+        if (!$admin) {
+            $admin = User::create([
+                'name' => 'Administrateur',
+                'email' => 'admin@maisonconnectee.com',
+                'password' => Hash::make('admin123'),
+                'role' => 'admin',
+                'surname' => 'Admin',
+                'username' => 'admin',
+                'gender' => 'other',
+                'birthdate' => '1990-01-01',
+                'member_type' => 'parent',
+                'level' => 'expert',
+                'points' => 1000
+            ]);
+        }
 
-        ConnectedObject::create([
-            'name' => 'Sonorisation Intelligente',
-            'description' => 'Un système de sonorisation connectée pour votre maison.',
-            'category' => 'Audio',
-            'brand' => 'Sonos',
-            'type' => 'Haut-parleur',
-            'status' => 'Actif',
-            'connectivity' => 'Wi-Fi',
-            'battery' => 'N/A',
-            'mode' => 'Automatique',
-            'current_temp' => null,
-            'target_temp' => null,
-            'last_interaction' => 'Aujourd\'hui, 14:00',
-        ]);
+        $objects = [
+            [
+                'name' => 'Thermostat Intelligent',
+                'description' => 'Thermostat connecté pour réguler la température de la maison',
+                'category' => 'Climatisation',
+                'room' => 'Salon',
+                'brand' => 'Nest',
+                'type' => 'Thermostat',
+                'status' => 'Actif',
+                'connectivity' => 'Wi-Fi',
+                'current_temp' => '21°C',
+                'target_temp' => '20°C',
+                'is_automated' => true,
+                'image' => 'thermostat.jpg'
+            ],
+            [
+                'name' => 'Caméra de Sécurité',
+                'description' => 'Caméra de surveillance connectée',
+                'category' => 'Sécurité',
+                'room' => 'Entrée',
+                'brand' => 'Ring',
+                'type' => 'Caméra',
+                'status' => 'Actif',
+                'connectivity' => 'Wi-Fi',
+                'is_automated' => true,
+                'image' => 'camera.png'
+            ],
+            [
+                'name' => 'Éclairage Intelligent',
+                'description' => 'Système d\'éclairage connecté',
+                'category' => 'Éclairage',
+                'room' => 'Salon',
+                'brand' => 'Philips Hue',
+                'type' => 'Ampoule',
+                'status' => 'Actif',
+                'connectivity' => 'Zigbee',
+                'is_automated' => true,
+                'image' => 'ampoule-intelligente.jpg'
+            ],
+            [
+                'name' => 'Prise Connectée',
+                'description' => 'Prise électrique intelligente',
+                'category' => 'Énergie',
+                'room' => 'Cuisine',
+                'brand' => 'TP-Link',
+                'type' => 'Prise',
+                'status' => 'Actif',
+                'connectivity' => 'Wi-Fi',
+                'is_automated' => true,
+                'image' => 'prise-intelligente.jpg'
+            ],
+            [
+                'name' => 'Détecteur de Fumée',
+                'description' => 'Détecteur de fumée connecté',
+                'category' => 'Sécurité',
+                'room' => 'Couloir',
+                'brand' => 'Nest',
+                'type' => 'Détecteur',
+                'status' => 'Actif',
+                'connectivity' => 'Wi-Fi',
+                'is_automated' => true,
+                'image' => 'detecteur.jpg'
+            ]
+        ];
+
+        foreach ($objects as $object) {
+            ConnectedObject::create(array_merge($object, [
+                'house_id' => $house->id,
+                'user_id' => $admin->id
+            ]));
+        }
     }
 }

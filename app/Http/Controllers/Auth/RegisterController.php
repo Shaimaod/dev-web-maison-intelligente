@@ -35,10 +35,10 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
-            'surname' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:255', 'unique:users'],
+            'surname' => ['nullable', 'string', 'max:255'],
+            'username' => ['nullable', 'string', 'max:255', 'unique:users'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'gender' => ['required', 'string'],
+            'gender' => ['nullable', 'string'],
             'birthdate' => ['required', 'date'],
             'member_type' => ['required', 'string'],
             'photo' => ['nullable', 'image', 'max:2048'],
@@ -61,7 +61,7 @@ class RegisterController extends Controller
         }
 
         // Création de l'utilisateur
-        return User::create([
+        $user = User::create([
             'name' => $data['name'],
             'surname' => $data['surname'],
             'username' => $data['username'],
@@ -71,7 +71,14 @@ class RegisterController extends Controller
             'member_type' => $data['member_type'],
             'photo' => $photoPath,
             'password' => Hash::make($data['password']),
+            'points' => 0, // Initialisation des points à 0
+            'level' => 'débutant', // Initialisation du niveau
         ]);
+
+        // Mettre à jour le niveau (même si c'est débutant, pour la cohérence)
+        $user->updateLevel();
+
+        return $user;
     }
 
     /**

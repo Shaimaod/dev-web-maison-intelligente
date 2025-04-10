@@ -27,7 +27,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/dashboard.connected';
 
     /**
      * Create a new controller instance.
@@ -65,16 +65,16 @@ class LoginController extends Controller
             }
 
             // Ajouter des points d'expérience à chaque connexion
-            $user->points += 1;  // Ajouter 1 point pour chaque connexion (vous pouvez ajuster cela)
+            $user->addPoints('login');
             
             // Mettre à jour le niveau de l'utilisateur
-            $user->updateLevel();  // Mettre à jour le niveau en fonction des points
+            $user->updateLevel();
 
             // Sauvegarder l'utilisateur avec les nouveaux points et le niveau mis à jour
             $user->save();
 
-            // Si l'email est vérifié, on redirige vers le tableau de bord connecté
-            return redirect()->intended(route('dashboard.connected'));
+            // Rediriger vers le tableau de bord connecté
+            return redirect()->route('dashboard.connected');
         }
 
         // En cas d'échec de la tentative de connexion

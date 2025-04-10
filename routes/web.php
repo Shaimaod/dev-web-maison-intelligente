@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Controllers\ExperienceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,9 +26,7 @@ Auth::routes(['verify' => true]);
 |--------------------------------------------------------------------------
 | Routes accessibles à tous les utilisateurs, même non authentifiés.
 */
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HomeController::class, 'index']);
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +45,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Route pour accéder à la page dashboard.connected
     Route::get('/dashboard.connected', [ConnectedObjectController::class, 'dashboardConnected'])->name('dashboard.connected');  // Nouvelle méthode pour afficher dashboard
+    
+    // Routes pour la gestion des objets connectés
+    Route::get('/object/{id}', [ConnectedObjectController::class, 'show'])->name('object.show');
+    Route::put('/object/{id}', [ConnectedObjectController::class, 'update'])->name('object.update');
+
+    // Route pour la page des objets connectés
+    Route::get('/connected-objects', [ConnectedObjectController::class, 'showConnectedObjects'])->name('connected.objects');
 });
 
 /*
@@ -59,9 +65,8 @@ Route::middleware([RedirectIfAuthenticated::class])->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 
-    // Les routes 'freetour' et 'dashboard.connected' sont disponibles aussi sans authentification
+    // Les routes 'freetour' est disponible sans authentification
     Route::get('/freetour', [ConnectedObjectController::class, 'index'])->name('freetour');
-    Route::get('/dashboard.connected', [ConnectedObjectController::class, 'dashboardConnected'])->name('dashboard.connected');
 });
 
 /*
@@ -82,6 +87,11 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->group(function () {
     Route::get('/authorized-users', [AuthorizedUserController::class, 'index'])->name('authorized-users.index');
     Route::post('/authorized-users', [AuthorizedUserController::class, 'store'])->name('authorized-users.store');
     Route::delete('/authorized-users/{id}', [AuthorizedUserController::class, 'destroy'])->name('authorized-users.destroy');
+
+    // Routes pour la gestion de l'expérience utilisateur
+    Route::get('/experience', [ExperienceController::class, 'index'])->name('admin.experience');
+    Route::post('/experience/update', [ExperienceController::class, 'updatePoints'])->name('admin.experience.update');
+    Route::post('/experience/user/{user}', [ExperienceController::class, 'updateUserPoints'])->name('admin.experience.update-user');
 });
 
 /*
@@ -128,7 +138,13 @@ Route::middleware(['auth'])->group(function () {
     
     // Mettre à jour le profil de l'utilisateur
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
-});
 
-// Ajouter la route pour la nouvelle page
-Route::get('/connected-objects', [ConnectedObjectController::class, 'showConnectedObjects'])->name('connected.objects');
+    // Rechercher des profils
+    Route::get('/profiles/search', [ProfileController::class, 'search'])->name('profiles.search');
+    
+    // Afficher un profil spécifique
+    Route::get('/profiles/{user}', [ProfileController::class, 'showProfile'])->name('profiles.show');
+
+    // Modifier le profil
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+});

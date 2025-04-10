@@ -8,7 +8,6 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Assurez-vous que la vue "dashboard.connected" existe
-        return view('dashboard.connected'); // Vue à définir
+        return view('welcome');
     }
 }

@@ -8,13 +8,13 @@ class CreateObjectsTable extends Migration
 {
     public function up()
     {
-        Schema::create('objects', function (Blueprint $table) {
+        Schema::create('connected_objects', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('house_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->text('description');
             $table->string('category');
-
-            // Ajout des attributs avancés
+            $table->string('room')->nullable();               // Pièce où se trouve l'objet
             $table->string('brand')->nullable();              // Marque (ex : Phillips)
             $table->string('type')->nullable();               // Type d'objet (caméra, thermostat...)
             $table->string('status')->default('Inactif');     // Actif / Inactif
@@ -24,13 +24,15 @@ class CreateObjectsTable extends Migration
             $table->string('current_temp')->nullable();       // Température actuelle (si pertinent)
             $table->string('target_temp')->nullable();        // Température cible (si pertinent)
             $table->string('last_interaction')->nullable();   // Dernière interaction
-
+            $table->json('settings')->nullable();             // Paramètres spécifiques à l'objet
+            $table->json('schedule')->nullable();             // Programmation horaire
+            $table->boolean('is_automated')->default(false);  // Si l'objet peut être automatisé
             $table->timestamps();
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('objects');
+        Schema::dropIfExists('connected_objects');
     }
 }
