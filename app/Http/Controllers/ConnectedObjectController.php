@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\ConnectedObject;
+use App\Models\ActivityLog;
 use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ConnectedObjectController extends Controller
 {
@@ -36,80 +38,63 @@ class ConnectedObjectController extends Controller
     // Méthode pour récupérer les objets filtrés via l'API
     public function getObjects(Request $request)
     {
-        try {
-            \Log::info('Début de getObjects', ['request' => $request->all()]);
-            
-            // Validation des paramètres
-            $validated = $request->validate([
-                'query' => 'nullable|string|max:255',
-                'category' => 'nullable|string|max:255',
-                'brand' => 'nullable|string|max:255',
-                'status' => 'nullable|string|max:255',
-                'per_page' => 'nullable|integer|min:1|max:100',
+        // Vérifier si des paramètres de recherche sont fournis
+        $searchDetails = [
+            'query' => $request->input('query'),
+            'category' => $request->input('category'),
+            'brand' => $request->input('brand'),
+            'status' => $request->input('status'),
+            'per_page' => $request->input('per_page', 12)
+        ];
+
+        // Filtrer les valeurs nulles ou vides
+        $searchDetails = array_filter($searchDetails, function($value) {
+            return !is_null($value) && $value !== '';
+        });
+
+        // Ne pas enregistrer de log si tous les champs de recherche sont vides
+        if (auth()->check() && !empty($searchDetails) && count($searchDetails) > 1) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action_type' => 'object_search',
+                'description' => 'Recherche d\'objets connectés',
+                'details' => $searchDetails
             ]);
-
-            $query = $request->query('query');
-            $category = $request->query('category');
-            $brand = $request->query('brand');
-            $status = $request->query('status');
-            $perPage = $request->query('per_page', 10);
-
-            \Log::info('Paramètres validés', [
-                'query' => $query,
-                'category' => $category,
-                'brand' => $brand,
-                'status' => $status,
-                'per_page' => $perPage
-            ]);
-
-            // Construire la requête pour récupérer tous les objets
-            $objects = ConnectedObject::query();
-            \Log::info('Nombre total d\'objets avant filtres', ['count' => $objects->count()]);
-
-            // Appliquer les filtres
-            if ($query) {
-                $objects->where(function ($q) use ($query) {
-                    $q->where('name', 'like', "%{$query}%")
-                    ->orWhere('description', 'like', "%{$query}%");
-                });
-            }
-
-            if ($category) {
-                $objects->where('category', $category);
-            }
-
-            if ($brand) {
-                $objects->where('brand', $brand);
-            }
-
-            if ($status) {
-                $objects->where('status', $status);
-            }
-
-            \Log::info('Nombre d\'objets après filtres', ['count' => $objects->count()]);
-
-            // Pagination
-            $objectsPaginated = $objects->paginate($perPage);
-            \Log::info('Résultats paginés', [
-                'total' => $objectsPaginated->total(),
-                'per_page' => $objectsPaginated->perPage(),
-                'current_page' => $objectsPaginated->currentPage(),
-                'last_page' => $objectsPaginated->lastPage()
-            ]);
-
-            // Retourner les résultats paginés
-            return response()->json($objectsPaginated);
-            
-        } catch (\Exception $e) {
-            \Log::error('Erreur dans getObjects', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json([
-                'error' => 'Une erreur est survenue',
-                'message' => $e->getMessage()
-            ], 500);
         }
+
+        $validated = $request->validate([
+            'query' => 'nullable|string|max:255',
+            'category' => 'nullable|string|max:255',
+            'brand' => 'nullable|string|max:255',
+            'status' => 'nullable|string|in:active,inactive',
+            'per_page' => 'nullable|integer|min:1|max:100'
+        ]);
+
+        $query = ConnectedObject::query();
+
+        if ($request->filled('query')) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->input('query') . '%')
+                  ->orWhere('description', 'like', '%' . $request->input('query') . '%');
+            });
+        }
+
+        if ($request->filled('category')) {
+            $query->where('category', $request->input('category'));
+        }
+
+        if ($request->filled('brand')) {
+            $query->where('brand', $request->input('brand'));
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        $perPage = $request->input('per_page', 12);
+        $objects = $query->paginate($perPage);
+
+        return response()->json($objects);
     }
 
     // Méthode pour ajouter un nouvel objet connecté
@@ -161,48 +146,73 @@ class ConnectedObjectController extends Controller
     }
 
     /**
+     * Affiche la page d'édition d'un objet connecté
+     */
+    public function edit($id)
+    {
+        $object = ConnectedObject::findOrFail($id);
+        return view('object.edit', compact('object'));
+    }
+
+    /**
      * Met à jour un objet connecté
      */
     public function update(Request $request, $id)
     {
-        try {
-            $object = ConnectedObject::findOrFail($id);
-            
-            $validated = $request->validate([
-                'status' => 'nullable|string|max:255',
-                'mode' => 'nullable|string|max:255',
-                'brightness' => 'nullable|integer|min:0|max:100',
-                'color' => 'nullable|string|max:7',
-                'surveillance_mode' => 'nullable|string|max:255',
-                'sensitivity' => 'nullable|integer|min:1|max:10',
-                'volume' => 'nullable|integer|min:0|max:100',
-                'audio_source' => 'nullable|string|max:255',
-                'target_temp' => 'nullable|string|max:255',
-            ]);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'category' => 'required|string|max:255',
+            'room' => 'required|string|max:255',
+            'brand' => 'required|string|max:255',
+            'type' => 'required|string|max:255',
+            'status' => 'required|string|in:Actif,Inactif',
+            'connectivity' => 'required|string|max:255',
+            'battery' => 'nullable|integer|min:0|max:100',
+            'mode' => 'nullable|string|max:255',
+            'is_automated' => 'boolean',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-            $object->update($validated);
+        $object = ConnectedObject::findOrFail($id);
 
-            // Enregistrement du log d'activité
-            $this->logActivity(
-                'object_updated',
-                'Objet connecté mis à jour',
-                [
-                    'object_id' => $object->id,
-                    'object_name' => $object->name,
-                    'changes' => $validated
-                ]
-            );
+        $data = $request->all();
 
-            return response()->json([
-                'message' => 'Objet connecté mis à jour avec succès',
-                'object' => $object
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Erreur lors de la mise à jour de l\'objet',
-                'error' => $e->getMessage()
-            ], 500);
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $image->storeAs('public/connected_objects', $imageName);
+            $data['image'] = 'connected_objects/' . $imageName;
         }
+
+        // Récupérer les anciennes valeurs pour comparaison
+        $oldValues = $object->only(array_keys($data));
+
+        // Mettre à jour l'objet
+        $object->update($data);
+
+        // Enregistrer les modifications dans l'historique utilisateur
+        $changes = [];
+        foreach ($data as $key => $value) {
+            if (isset($oldValues[$key]) && $oldValues[$key] != $value) {
+                $changes[] = ucfirst($key) . ': "' . $oldValues[$key] . '" → "' . $value . '"';
+            }
+        }
+
+        if (!empty($changes)) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action_type' => 'object_updated',
+                'description' => 'Modification d\'un objet connecté',
+                'details' => [
+                    'object_id' => $id,
+                    'changes' => implode(', ', $changes),
+                ],
+            ]);
+        }
+
+        return redirect()->route('object.show', $object->id)
+            ->with('success', 'Objet connecté mis à jour avec succès.');
     }
 
     public function destroy($id)

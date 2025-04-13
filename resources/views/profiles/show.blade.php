@@ -1,4 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.user')
+
+@section('title', 'Profil de ' . $user->name)
 
 @section('content')
 <div class="container">

@@ -92,26 +92,28 @@
                             </li>
                         @endguest
                         @auth
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('dashboard.connected') }}">
-                                    <i class="fas fa-home me-1"></i>Tableau de bord
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('connected.objects') }}">
-                                    <i class="fas fa-plug me-1"></i>Objets connectés
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('profiles.search') }}">
-                                    <i class="fas fa-search me-1"></i>Rechercher des profils
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('profile.show') }}">
-                                    <i class="fas fa-user me-1"></i>Profil
-                                </a>
-                            </li>
+                            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('dashboard.connected') }}">
+                                        <i class="fas fa-tachometer-alt me-1"></i>Tableau de bord
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('connected.objects') }}">
+                                        <i class="fas fa-plug me-1"></i>Objets connectés
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('profiles.search') }}">
+                                        <i class="fas fa-search me-1"></i>Rechercher des profils
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('profile.show') }}">
+                                        <i class="fas fa-user me-1"></i>Profil
+                                    </a>
+                                </li>
+                            </ul>
                         @endauth
                     </ul>
 

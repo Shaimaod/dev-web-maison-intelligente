@@ -127,6 +127,9 @@
                         <td>
                             @if($user->id !== Auth::id())
                             <div class="btn-group">
+                                <a href="{{ route('profile.activity', ['user' => $user->id]) }}" class="btn btn-sm btn-info me-1" title="Voir l'historique">
+                                    <i class="fas fa-history"></i>
+                                </a>
                                 <form action="{{ route('admin.updateRole', $user->id) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('PUT')

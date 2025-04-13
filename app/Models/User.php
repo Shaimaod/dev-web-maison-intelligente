@@ -39,6 +39,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'birthdate' => 'date',
             'password' => 'hashed',
+            'created_at' => 'datetime',
+            'last_login_at' => 'datetime',
         ];
     }
 
@@ -182,5 +184,21 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isHouseGuest()
     {
         return $this->house_role === 'guest';
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut ajouter des objets connectés
+     */
+    public function canAddObjects()
+    {
+        return in_array($this->level, ['advanced', 'expert']);
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut demander la suppression d'un objet connecté
+     */
+    public function canRequestObjectDeletion()
+    {
+        return in_array($this->level, ['advanced', 'expert']);
     }
 }

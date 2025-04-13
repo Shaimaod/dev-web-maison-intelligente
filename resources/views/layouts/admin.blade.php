@@ -106,6 +106,11 @@
                         <i class="fas fa-star"></i> Gestion de l'expérience
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.deletion-requests.*') ? 'active' : '' }}" href="{{ route('admin.deletion-requests.index') }}">
+                        <i class="fas fa-trash-alt"></i> Demandes de suppression
+                    </a>
+                </li>
             </ul>
         </div>
 

@@ -33,7 +33,12 @@
             <!-- Statistiques -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">Statistiques</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Statistiques</h5>
+                        <a href="{{ route('profile.activity') }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-history"></i> Voir l'historique
+                        </a>
+                    </div>
                     <div class="mb-3">
                         <div class="d-flex justify-content-between mb-1">
                             <span class="text-muted">Objets connectés</span>
