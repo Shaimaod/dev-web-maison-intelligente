@@ -46,23 +46,15 @@ Une application web de gestion d'objets connectés pour maison intelligente, per
    php artisan migrate:fresh --seed
    ```
 
-6. Lancer le serveur local :
+6. Copier le '.env'
+
+7. Lancer le serveur local :
    ```bash
    php artisan serve
    npm run dev
    ```
 
 6. Configurez votre base de données dans le fichier `.env`
-
-7. Exécutez les migrations pour créer les tables :
-   ```bash
-   php artisan migrate
-   ```
-
-8. Lancez le serveur de développement :
-   ```bash
-   php artisan serve
-   ```
 
 L'application sera accessible à l'adresse : http://localhost:8000
 
