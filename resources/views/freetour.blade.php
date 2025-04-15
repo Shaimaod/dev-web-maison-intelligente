@@ -4,18 +4,18 @@
 <link href="{{ asset('css/freetour.css') }}" rel="stylesheet">
 
 <div id="freetour-app">
-    <div class="hero-section">
-        <div class="hero-content">
-            <h1 class="hero-title">Découvrez nos Objets Connectés</h1>
-            <p class="hero-subtitle">Explorez notre catalogue d'objets connectés et trouvez ceux qui correspondent à vos besoins</p>
+    <div class="hero-section text-white text-center py-5" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);">
+        <div class="container">
+            <h1 class="hero-title display-4">Découvrez nos Objets Connectés</h1>
+            <p class="hero-subtitle lead">Explorez notre catalogue d'objets connectés et trouvez ceux qui correspondent à vos besoins</p>
         </div>
     </div>
 
-    <div class="container">
-        <div class="search-section">
-            <div class="row">
+    <div class="container py-5">
+        <div class="search-section bg-light p-4 rounded shadow-sm mb-4">
+            <div class="row g-3">
                 <div class="col-md-4">
-                    <select class="search-input" v-model="category" @change="fetchObjects">
+                    <select class="form-select" v-model="category" @change="fetchObjects">
                         <option value="">Toutes les catégories</option>
                         <option value="Éclairage">Éclairage</option>
                         <option value="Climatisation">Climatisation</option>
@@ -26,7 +26,7 @@
                 </div>
                 <div class="col-md-6">
                     <input type="text" 
-                           class="search-input" 
+                           class="form-control" 
                            v-model="query" 
                            @input="debounceSearch"
                            placeholder="Rechercher un objet...">
@@ -60,19 +60,21 @@
             <p class="text-muted">Essayez de modifier vos critères de recherche</p>
         </div>
 
-        <div v-else class="object-grid">
-            <div v-for="object in objects" :key="object.id" class="object-card">
-                <div class="object-image-container">
-                    <img v-if="object.photo" :src="'/storage/' + object.photo" :alt="object.name" class="object-image">
-                    <div v-else class="default-image">
-                        <i class="fas fa-plug fa-3x"></i>
+        <div v-else class="row g-4">
+            <div v-for="object in objects" :key="object.id" class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="object-image-container">
+                        <img v-if="object.photo" :src="'/storage/' + object.photo" :alt="object.name" class="card-img-top">
+                        <div v-else class="default-image d-flex align-items-center justify-content-center bg-light">
+                            <i class="fas fa-plug fa-3x text-muted"></i>
+                        </div>
                     </div>
-                </div>
-                <div class="object-info">
-                    <h4 class="object-title">@{{ object.name }}</h4>
-                    <p class="object-category">@{{ object.category }}</p>
-                    <p>@{{ object.description }}</p>
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="card-body">
+                        <h5 class="card-title">@{{ object.name }}</h5>
+                        <p class="card-text text-muted">@{{ object.category }}</p>
+                        <p class="card-text">@{{ object.description }}</p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between align-items-center">
                         <span class="badge" :class="object.status === 'Actif' ? 'bg-success' : 'bg-danger'">
                             @{{ object.status }}
                         </span>
@@ -108,29 +110,25 @@
 
 <style>
 .object-image-container {
-    width: 100%;
     height: 200px;
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
+}
+
+.default-image {
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: #f8f9fa;
-    border-radius: 8px 8px 0 0;
-    overflow: hidden;
 }
 
-.object-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.hero-section {
+    margin-bottom: 30px;
 }
 
-.default-image {
-    color: #6c757d;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
+.search-section {
+    margin-bottom: 30px;
 }
 
 .object-grid {

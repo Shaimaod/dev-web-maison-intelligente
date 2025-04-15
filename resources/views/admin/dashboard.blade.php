@@ -6,68 +6,53 @@
 <div class="row">
     <!-- Statistiques -->
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Utilisateurs totaux</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $users->count() }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-users fa-2x text-gray-300"></i>
-                    </div>
+        <div class="card shadow-sm border-0">
+            <div class="card-body d-flex align-items-center">
+                <div class="me-3">
+                    <div class="text-uppercase text-primary fw-bold small">Utilisateurs totaux</div>
+                    <div class="h5 fw-bold">{{ $users->count() }}</div>
+                </div>
+                <div class="ms-auto">
+                    <i class="fas fa-users fa-2x text-primary"></i>
                 </div>
             </div>
         </div>
     </div>
-
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Utilisateurs actifs</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $users->where('last_login_at', '>=', now()->subDay())->count() }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-user-check fa-2x text-gray-300"></i>
-                    </div>
+        <div class="card shadow-sm border-0">
+            <div class="card-body d-flex align-items-center">
+                <div class="me-3">
+                    <div class="text-uppercase text-success fw-bold small">Utilisateurs actifs</div>
+                    <div class="h5 fw-bold">{{ $users->where('last_login_at', '>=', now()->subDay())->count() }}</div>
+                </div>
+                <div class="ms-auto">
+                    <i class="fas fa-user-check fa-2x text-success"></i>
                 </div>
             </div>
         </div>
     </div>
-
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-info shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Emails autorisés</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ \App\Models\AuthorizedUser::count() }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-envelope fa-2x text-gray-300"></i>
-                    </div>
+        <div class="card shadow-sm border-0">
+            <div class="card-body d-flex align-items-center">
+                <div class="me-3">
+                    <div class="text-uppercase text-info fw-bold small">Emails autorisés</div>
+                    <div class="h5 fw-bold">{{ \App\Models\AuthorizedUser::count() }}</div>
+                </div>
+                <div class="ms-auto">
+                    <i class="fas fa-envelope fa-2x text-info"></i>
                 </div>
             </div>
         </div>
     </div>
-
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Objets connectés</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ \App\Models\ConnectedObject::count() }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-plug fa-2x text-gray-300"></i>
-                    </div>
+        <div class="card shadow-sm border-0">
+            <div class="card-body d-flex align-items-center">
+                <div class="me-3">
+                    <div class="text-uppercase text-warning fw-bold small">Objets connectés</div>
+                    <div class="h5 fw-bold">{{ \App\Models\ConnectedObject::count() }}</div>
+                </div>
+                <div class="ms-auto">
+                    <i class="fas fa-plug fa-2x text-warning"></i>
                 </div>
             </div>
         </div>
@@ -75,22 +60,22 @@
 </div>
 
 <!-- Liste des utilisateurs -->
-<div class="card shadow mb-4">
-    <div class="card-header py-3 d-flex justify-content-between align-items-center">
-        <h6 class="m-0 font-weight-bold text-primary">
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">
             <i class="fas fa-users me-2"></i>Liste des utilisateurs
         </h6>
         <form class="d-flex" method="GET" action="{{ route('admin.dashboard') }}">
             <input type="text" name="search" class="form-control me-2" placeholder="Rechercher..." value="{{ request('search') }}">
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-light">
                 <i class="fas fa-search"></i>
             </button>
         </form>
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
                     <tr>
                         <th>Utilisateur</th>
                         <th>Rôle</th>
@@ -105,9 +90,9 @@
                         <td>
                             <div class="d-flex align-items-center">
                                 @if($user->photo)
-                                    <img src="{{ asset('storage/' . $user->photo) }}" class="rounded-circle me-2" width="32" height="32" alt="{{ $user->name }}">
+                                    <img src="{{ asset('storage/' . $user->photo) }}" class="rounded-circle me-2" width="40" height="40" alt="{{ $user->name }}">
                                 @else
-                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
                                         <i class="fas fa-user"></i>
                                     </div>
                                 @endif
@@ -127,7 +112,7 @@
                         <td>
                             @if($user->id !== Auth::id())
                             <div class="btn-group">
-                                <a href="{{ route('profile.activity', ['user' => $user->id]) }}" class="btn btn-sm btn-info me-1" title="Voir l'historique">
+                                <a href="{{ route('profile.activity', ['user' => $user->id]) }}" class="btn btn-sm btn-info" title="Voir l'historique">
                                     <i class="fas fa-history"></i>
                                 </a>
                                 <form action="{{ route('admin.updateRole', $user->id) }}" method="POST" class="d-inline">

@@ -32,10 +32,10 @@ class HouseSeeder extends Seeder
             }
 
             $house = House::create([
-                'name' => 'Maison Connectée',
+                'name' => 'Connect\'Toit',
                 'address' => '123 Rue de la Technologie',
                 'description' => 'Une maison moderne et connectée'
             ]);
         }
     }
-} 
+}

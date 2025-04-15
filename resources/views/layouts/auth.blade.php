@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Maison Connectée') }} - @yield('title')</title>
+    <title>{{ config('app.name', 'Connect’Toit') }} - @yield('title')</title>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.bunny.net">
@@ -136,7 +136,7 @@
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
-                <h2 class="mb-0">{{ config('app.name', 'Maison Connectée') }}</h2>
+                <h2 class="mb-0">{{ config('app.name', 'Connect’Toit') }}</h2>
                 <p class="mb-0">@yield('title')</p>
             </div>
             <div class="auth-body">
@@ -166,4 +166,4 @@
         </div>
     </div>
 </body>
-</html> 
+</html>

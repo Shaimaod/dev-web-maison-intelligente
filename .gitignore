@@ -3,7 +3,6 @@
 /node_modules
 
 # Ignorer les fichiers temporaires générés par Laravel
-/public/storage
 /storage/*.key
 
 # Ignorer les fichiers de log

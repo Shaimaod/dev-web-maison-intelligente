@@ -12,6 +12,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\DeletionRequestController;
+use App\Http\Controllers\EnergyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,10 +51,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Routes pour la gestion des objets connectés
     Route::get('/object/{id}', [ConnectedObjectController::class, 'show'])->name('object.show');
     Route::get('/object/{id}/edit', [ConnectedObjectController::class, 'edit'])->name('object.edit');
+    Route::get('/object/{id}/edit', [ConnectedObjectController::class, 'edit'])->name('object.edit');
     Route::put('/object/{id}', [ConnectedObjectController::class, 'update'])->name('object.update');
+    Route::put('/object/{id}/updateForEdit', [ConnectedObjectController::class, 'updateForEdit'])->name('object.updateForEdit');
     Route::get('/connected-objects/create', [ConnectedObjectController::class, 'create'])->name('connected.objects.create');
     Route::post('/connected-objects', [ConnectedObjectController::class, 'store'])->name('connected.objects.store');
-    Route::post('/object/{id}/request-deletion', [ConnectedObjectController::class, 'requestDeletion'])->name('object.request-deletion');
+    Route::post('/object/{id}/request-deletion', [DeletionRequestController::class, 'requestDeletion'])->name('object.request-deletion');
 
     // Route pour la page des objets connectés
     Route::get('/connected-objects', [ConnectedObjectController::class, 'showConnectedObjects'])->name('connected.objects');
@@ -97,6 +100,11 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->group(function () {
     Route::get('/experience', [ExperienceController::class, 'index'])->name('admin.experience');
     Route::post('/experience/update', [ExperienceController::class, 'updatePoints'])->name('admin.experience.update');
     Route::post('/experience/user/{user}', [ExperienceController::class, 'updateUserPoints'])->name('admin.experience.update-user');
+    
+    // Routes pour la gestion des demandes de suppression
+    Route::get('/deletion-requests', [DeletionRequestController::class, 'index'])->name('admin.deletion-requests.index');
+    Route::get('/deletion-requests/{request}', [DeletionRequestController::class, 'show'])->name('admin.deletion-requests.show');
+    Route::post('/deletion-requests/{deletionRequest}/process', [DeletionRequestController::class, 'process'])->name('admin.deletion-requests.process');
     
     // Routes pour la gestion des demandes de suppression
     Route::get('/deletion-requests', [DeletionRequestController::class, 'index'])->name('admin.deletion-requests.index');
@@ -160,4 +168,16 @@ Route::middleware(['auth'])->group(function () {
 
     // Route pour afficher l'historique des actions de l'utilisateur
     Route::get('/profile/activity', [ProfileController::class, 'activity'])->name('profile.activity');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Routes pour la gestion de l'énergie
+|--------------------------------------------------------------------------
+| Ces routes sont accessibles uniquement aux utilisateurs authentifiés.
+*/
+Route::middleware(['auth'])->group(function () {
+    Route::post('/energy/set-goal', [EnergyController::class, 'setGoal'])->name('energy.set-goal');
+    Route::get('/energy/history', [EnergyController::class, 'history'])->name('energy.history');
+    Route::get('/energy/details', [EnergyController::class, 'details'])->name('energy.details');
 });

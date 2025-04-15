@@ -16,7 +16,7 @@ class ConnectedObjectSeeder extends Seeder
 
         if (!$house) {
             $house = House::create([
-                'name' => 'Maison Connectée',
+                'name' => 'Connect\'Toit',
                 'address' => '123 Rue de la Technologie, 75000 Paris',
                 'description' => 'La maison connectée par défaut du système'
             ]);

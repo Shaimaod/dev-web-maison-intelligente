@@ -30,7 +30,7 @@
 </head>
 <body>
     <div class="email-container">
-        <h1>Bienvenue sur Maison Connectée !</h1>
+        <h1>Bienvenue sur Connect'Toit !</h1>
         <p>Merci de vous être inscrit sur notre plateforme. Un email de vérification a été envoyé à votre adresse.</p>
         <p>Merci de vérifier votre email avant de vous connecter.</p>
     </div>

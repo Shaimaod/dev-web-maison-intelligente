@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Maison Connectée') }} - Administration</title>
+    <title>{{ config('app.name', 'Connect\'Toit') }} - Administration</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -87,7 +87,7 @@
         <!-- Sidebar -->
         <div class="sidebar p-3" style="width: 250px;">
             <div class="mb-4">
-                <h4 class="text-white mb-0">{{ config('app.name', 'Maison Connectée') }}</h4>
+                <h4 class="text-white mb-0">{{ config('app.name', 'Connect\'Toit') }}</h4>
                 <small class="text-white-50">Administration</small>
             </div>
             <ul class="nav flex-column">
@@ -153,4 +153,4 @@
         </div>
     </div>
 </body>
-</html> 
+</html>

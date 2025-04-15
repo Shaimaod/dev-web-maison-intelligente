@@ -6,6 +6,8 @@
 <form method="POST" action="{{ route('login') }}">
     @csrf
 
+    <h1 class="h3 mb-3 fw-normal">Connectez-vous à Connect’Toit</h1>
+
     <div class="mb-4">
         <label for="email" class="form-label">Adresse e-mail</label>
         <div class="input-group">
@@ -62,6 +64,7 @@
 <a href="{{ route('register') }}">
     Créer un compte
 </a>
+<p class="mt-5 mb-3 text-muted">&copy; {{ date('Y') }} Connect’Toit. Tous droits réservés.</p>
 @endsection
 
 @push('scripts')

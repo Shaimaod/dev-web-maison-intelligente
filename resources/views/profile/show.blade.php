@@ -3,18 +3,18 @@
 @section('title', 'Mon profil')
 
 @section('content')
-<div class="container py-4">
+<div class="container py-5">
     <div class="row">
         <!-- Colonne de gauche - Informations du profil -->
         <div class="col-md-4">
-            <div class="card mb-4">
+            <div class="card shadow-sm mb-4">
                 <div class="card-body text-center">
                     <div class="position-relative d-inline-block mb-3">
                         @if($user->photo)
-                            <img src="{{ asset('storage/' . $user->photo) }}" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                            <img src="{{ asset('storage/' . $user->photo) }}" class="rounded-circle border" style="width: 150px; height: 150px; object-fit: cover;">
                         @else
-                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
-                                <i class="fas fa-user fa-3x text-white"></i>
+                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white" style="width: 150px; height: 150px;">
+                                <i class="fas fa-user fa-3x"></i>
                             </div>
                         @endif
                         <button class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle" style="width: 40px; height: 40px;" onclick="document.getElementById('photo').click()">
@@ -31,7 +31,7 @@
             </div>
 
             <!-- Statistiques -->
-            <div class="card mb-4">
+            <div class="card shadow-sm mb-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="card-title mb-0">Statistiques</h5>
@@ -63,8 +63,8 @@
 
         <!-- Colonne de droite - Formulaire de modification -->
         <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">Modifier le profil</h5>
                 </div>
                 <div class="card-body">
@@ -137,7 +137,6 @@
         </div>
     </div>
 </div>
-@endsection
 
 @push('scripts')
 <script>
@@ -153,3 +152,4 @@ function previewImage(input) {
 }
 </script>
 @endpush
+@endsection

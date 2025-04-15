@@ -8,6 +8,7 @@
                 <div class="card-header">{{ __('Reset Password') }}</div>
 
                 <div class="card-body">
+                    <h1 class="h3 mb-3 fw-normal">Réinitialisez votre mot de passe sur Connect’Toit</h1>
                     <form method="POST" action="{{ route('password.update') }}">
                         @csrf
 
@@ -57,6 +58,7 @@
                             </div>
                         </div>
                     </form>
+                    <p class="mt-5 mb-3 text-muted">&copy; {{ date('Y') }} Connect’Toit. Tous droits réservés.</p>
                 </div>
             </div>
         </div>

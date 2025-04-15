@@ -3,10 +3,10 @@
 @section('title', 'Modifier mon profil')
 
 @section('content')
-<div class="container py-4">
+<div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card">
+            <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">
                         <i class="fas fa-user-edit me-2"></i>Modifier mon profil
@@ -27,10 +27,10 @@
                         <div class="mb-4 text-center">
                             <div class="position-relative d-inline-block">
                                 @if($user->photo)
-                                    <img src="{{ asset('storage/' . $user->photo) }}" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                    <img src="{{ asset('storage/' . $user->photo) }}" class="rounded-circle border" style="width: 150px; height: 150px; object-fit: cover;">
                                 @else
-                                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
-                                        <i class="fas fa-user fa-3x text-white"></i>
+                                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white" style="width: 150px; height: 150px;">
+                                        <i class="fas fa-user fa-3x"></i>
                                     </div>
                                 @endif
                                 <button type="button" class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle" style="width: 40px; height: 40px;" onclick="document.getElementById('photo').click()">
@@ -173,4 +173,4 @@ function previewImage(input) {
     }
 }
 </script>
-@endpush 
+@endpush

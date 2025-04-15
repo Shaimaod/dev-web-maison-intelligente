@@ -117,4 +117,37 @@ class DeletionRequestController extends Controller
         
         return redirect()->back()->with('error', 'Action non valide.');
     }
-} 
+
+    public function requestDeletion(Request $request, $id)
+    {
+        try {
+            $object = ConnectedObject::findOrFail($id);
+
+            if (!Auth::user()->canRequestObjectDeletion()) {
+                return response()->json(['message' => 'Vous n\'êtes pas autorisé à demander la suppression de cet objet.'], 403);
+            }
+
+            $existingRequest = DeletionRequest::where('object_id', $id)
+                ->where('user_id', Auth::id())
+                ->where('status', 'pending')
+                ->first();
+
+            if ($existingRequest) {
+                return response()->json(['message' => 'Une demande de suppression est déjà en attente pour cet objet.'], 400);
+            }
+
+            DeletionRequest::create([
+                'object_id' => $object->id,
+                'user_id' => Auth::id(),
+                'reason' => $request->input('reason', 'Demande utilisateur'),
+                'status' => 'pending',
+            ]);
+
+            return response()->json(['message' => 'Demande de suppression envoyée avec succès.'], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['message' => 'Objet non trouvé.'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Une erreur inattendue est survenue.'], 500);
+        }
+    }
+}

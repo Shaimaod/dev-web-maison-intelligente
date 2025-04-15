@@ -17,6 +17,8 @@
                     <form method="POST" action="{{ route('password.email') }}">
                         @csrf
 
+                        <h1 class="h3 mb-3 fw-normal">Demandez un lien de réinitialisation pour Connect’Toit</h1>
+
                         <div class="row mb-3">
                             <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
 
@@ -39,6 +41,8 @@
                             </div>
                         </div>
                     </form>
+
+                    <p class="mt-5 mb-3 text-muted">&copy; {{ date('Y') }} Connect’Toit. Tous droits réservés.</p>
                 </div>
             </div>
         </div>

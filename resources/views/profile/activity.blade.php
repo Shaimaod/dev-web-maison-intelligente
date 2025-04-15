@@ -320,13 +320,32 @@
                                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
+                                                            <h5>Détails de l'activité</h5>
                                                             <ul class="details-list">
-                                                                @foreach($activity->details as $key => $value)
-                                                                    <li>
-                                                                        <span class="details-label">{{ ucfirst(str_replace('_', ' ', $key)) }}:</span>
-                                                                        {{ is_array($value) ? json_encode($value) : $value }}
-                                                                    </li>
-                                                                @endforeach
+                                                                @if(isset($activity->details['object_id']))
+                                                                    <li><strong>Object ID:</strong> {{ $activity->details['object_id'] }}</li>
+                                                                @endif
+                                                                @if(isset($activity->details['object_name']))
+                                                                    <li><strong>Nom de l'objet:</strong> {{ $activity->details['object_name'] }}</li>
+                                                                @endif
+                                                                @if(isset($activity->details['object_category']))
+                                                                    <li><strong>Catégorie:</strong> {{ $activity->details['object_category'] }}</li>
+                                                                @endif
+                                                                @if(isset($activity->details['changes']))
+                                                                    <li><strong>Modifications:</strong></li>
+                                                                    <ul>
+                                                                        @php
+                                                                            $changes = is_string($activity->details['changes']) ? json_decode($activity->details['changes'], true) : $activity->details['changes'];
+                                                                        @endphp
+                                                                        @if(is_array($changes))
+                                                                            @foreach($changes as $key => $change)
+                                                                                <li>{{ ucfirst($key) }}: {{ $change['from'] }} → {{ $change['to'] }}</li>
+                                                                            @endforeach
+                                                                        @else
+                                                                            <li>Aucune modification disponible</li>
+                                                                        @endif
+                                                                    </ul>
+                                                                @endif
                                                             </ul>
                                                         </div>
                                                     </div>
@@ -406,4 +425,4 @@
     });
 </script>
 @endpush
-@endsection 
+@endsection
