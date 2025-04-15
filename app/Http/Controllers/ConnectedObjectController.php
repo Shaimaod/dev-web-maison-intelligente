@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
+use App\Services\ExperienceService;
 
 class ConnectedObjectController extends Controller
 {
@@ -391,6 +392,9 @@ class ConnectedObjectController extends Controller
 
         $connectedObject = ConnectedObject::create($data);
 
+        // Ajouter des points pour l'ajout d'un objet
+        app(ExperienceService::class)->addPointsForAction(auth()->user(), 'object_added');
+
         return redirect()->route('dashboard.connected')
             ->with('success', 'Objet connecté créé avec succès.');
     }
@@ -456,6 +460,14 @@ class ConnectedObjectController extends Controller
                 'description' => 'Modification d\'un objet connecté',
                 'details' => $changes
             ]);
+
+            // Ajouter des points pour la mise à jour d'un objet
+            app(ExperienceService::class)->addPointsForAction(auth()->user(), 'object_update');
+            
+            // Si le statut a changé, ajouter des points supplémentaires
+            if ($request->has('status')) {
+                app(ExperienceService::class)->addPointsForAction(auth()->user(), 'status_change');
+            }
 
             return response()->json([
                 'message' => 'Objet connecté mis à jour avec succès',
