@@ -12,11 +12,29 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
-use App\Services\ExperienceService;
 
 class ConnectedObjectController extends Controller
 {
     use LogsUserActivity;
+
+    public function __construct()
+    {
+        // Appliquer l'autorisation aux actions de modification
+        $this->middleware(function ($request, $next) {
+            if ($request->is('object/*/edit') || $request->isMethod('PUT') || $request->isMethod('DELETE')) {
+                $id = $request->route('id');
+                $object = ConnectedObject::findOrFail($id);
+                
+                if ($request->isMethod('DELETE')) {
+                    $this->authorize('delete', $object);
+                } else {
+                    $this->authorize('update', $object);
+                }
+            }
+            
+            return $next($request);
+        })->except(['index', 'dashboardConnected', 'showConnectedObjects', 'getObjects', 'show']);
+    }
 
     // Méthode pour afficher la vue de recherche des objets connectés pour freetour
     public function index()
@@ -156,12 +174,7 @@ class ConnectedObjectController extends Controller
      */
     private function getDeterministicTopObjects($user, $limit = 3)
     {
-        // Si l'utilisateur est un administrateur, récupérer tous les objets du système
-        if ($user->role === 'admin') {
-            $objects = ConnectedObject::all();
-        } else {
-            $objects = $user->connectedObjects;
-        }
+        $objects = $user->connectedObjects;
         
         if ($objects->isEmpty()) {
             return collect();
@@ -182,12 +195,7 @@ class ConnectedObjectController extends Controller
      */
     private function simulateTotalDeterministicConsumption($user)
     {
-        // Si l'utilisateur est un administrateur, utiliser tous les objets pour le calcul
-        if ($user->role === 'admin') {
-            $objects = ConnectedObject::all();
-        } else {
-            $objects = $user->connectedObjects;
-        }
+        $objects = $user->connectedObjects;
         
         if ($objects->isEmpty()) {
             // Valeur basée sur l'ID utilisateur si pas d'objets
@@ -210,13 +218,7 @@ class ConnectedObjectController extends Controller
      */
     private function getTopEnergyConsumingObjects($user, $limit = 3)
     {
-        // Si l'utilisateur est un administrateur, récupérer tous les objets du système
-        // pas uniquement ceux associés à son compte
-        if ($user->role === 'admin') {
-            $objects = ConnectedObject::pluck('id');
-        } else {
-            $objects = $user->connectedObjects()->pluck('id');
-        }
+        $objects = $user->connectedObjects()->pluck('id');
         
         // Si aucun objet, retourner une collection vide
         if ($objects->isEmpty()) {
@@ -275,12 +277,7 @@ class ConnectedObjectController extends Controller
      */
     private function calculateEnergyConsumption($user, $period = 'day')
     {
-        // Si l'utilisateur est un administrateur, utiliser tous les objets pour le calcul
-        if ($user->role === 'admin') {
-            $objects = ConnectedObject::pluck('id');
-        } else {
-            $objects = $user->connectedObjects()->pluck('id');
-        }
+        $objects = $user->connectedObjects()->pluck('id');
         
         // Si aucun objet, retourner 0
         if ($objects->isEmpty()) {
@@ -413,9 +410,6 @@ class ConnectedObjectController extends Controller
 
         $connectedObject = ConnectedObject::create($data);
 
-        // Ajouter des points pour l'ajout d'un objet
-        app(ExperienceService::class)->addPointsForAction(auth()->user(), 'object_added');
-
         return redirect()->route('dashboard.connected')
             ->with('success', 'Objet connecté créé avec succès.');
     }
@@ -445,6 +439,9 @@ class ConnectedObjectController extends Controller
     {
         try {
             $object = ConnectedObject::findOrFail($id);
+            $this->authorize('update', $object);
+            
+            // L'autorisation est déjà vérifiée dans le middleware du constructeur
             
             $validated = $request->validate([
                 'status' => 'nullable|string|max:255',
@@ -482,14 +479,6 @@ class ConnectedObjectController extends Controller
                 'details' => $changes
             ]);
 
-            // Ajouter des points pour la mise à jour d'un objet
-            app(ExperienceService::class)->addPointsForAction(auth()->user(), 'object_update');
-            
-            // Si le statut a changé, ajouter des points supplémentaires
-            if ($request->has('status')) {
-                app(ExperienceService::class)->addPointsForAction(auth()->user(), 'status_change');
-            }
-
             return response()->json([
                 'message' => 'Objet connecté mis à jour avec succès',
                 'object' => $object
@@ -507,6 +496,10 @@ class ConnectedObjectController extends Controller
      */
     public function updateForEdit(Request $request, $id)
     {
+        $object = ConnectedObject::findOrFail($id);
+        
+        // L'autorisation est déjà vérifiée dans le middleware du constructeur
+        
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -521,8 +514,6 @@ class ConnectedObjectController extends Controller
             'is_automated' => 'boolean',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-
-        $object = ConnectedObject::findOrFail($id);
 
         $data = $request->all();
 
@@ -572,6 +563,9 @@ class ConnectedObjectController extends Controller
     {
         try {
             $object = ConnectedObject::findOrFail($id);
+            
+            // L'autorisation est déjà vérifiée dans le middleware du constructeur
+            
             $objectName = $object->name;
             $object->delete();
 
