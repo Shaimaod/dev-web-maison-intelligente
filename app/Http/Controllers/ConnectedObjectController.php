@@ -156,7 +156,12 @@ class ConnectedObjectController extends Controller
      */
     private function getDeterministicTopObjects($user, $limit = 3)
     {
-        $objects = $user->connectedObjects;
+        // Si l'utilisateur est un administrateur, récupérer tous les objets du système
+        if ($user->role === 'admin') {
+            $objects = ConnectedObject::all();
+        } else {
+            $objects = $user->connectedObjects;
+        }
         
         if ($objects->isEmpty()) {
             return collect();
@@ -177,7 +182,12 @@ class ConnectedObjectController extends Controller
      */
     private function simulateTotalDeterministicConsumption($user)
     {
-        $objects = $user->connectedObjects;
+        // Si l'utilisateur est un administrateur, utiliser tous les objets pour le calcul
+        if ($user->role === 'admin') {
+            $objects = ConnectedObject::all();
+        } else {
+            $objects = $user->connectedObjects;
+        }
         
         if ($objects->isEmpty()) {
             // Valeur basée sur l'ID utilisateur si pas d'objets
@@ -200,7 +210,13 @@ class ConnectedObjectController extends Controller
      */
     private function getTopEnergyConsumingObjects($user, $limit = 3)
     {
-        $objects = $user->connectedObjects()->pluck('id');
+        // Si l'utilisateur est un administrateur, récupérer tous les objets du système
+        // pas uniquement ceux associés à son compte
+        if ($user->role === 'admin') {
+            $objects = ConnectedObject::pluck('id');
+        } else {
+            $objects = $user->connectedObjects()->pluck('id');
+        }
         
         // Si aucun objet, retourner une collection vide
         if ($objects->isEmpty()) {
@@ -259,7 +275,12 @@ class ConnectedObjectController extends Controller
      */
     private function calculateEnergyConsumption($user, $period = 'day')
     {
-        $objects = $user->connectedObjects()->pluck('id');
+        // Si l'utilisateur est un administrateur, utiliser tous les objets pour le calcul
+        if ($user->role === 'admin') {
+            $objects = ConnectedObject::pluck('id');
+        } else {
+            $objects = $user->connectedObjects()->pluck('id');
+        }
         
         // Si aucun objet, retourner 0
         if ($objects->isEmpty()) {
