@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Services\ExperienceService;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -91,12 +92,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function addPoints($action)
     {
-        $points = config('levels.points.' . $action, 0);
-        if ($points > 0) {
-            $this->points += $points;
-            $this->updateLevel();
-            $this->save();
-        }
+        $service = app(ExperienceService::class);
+        $service->addPointsForAction($this, $action);
         return $this;
     }
 
