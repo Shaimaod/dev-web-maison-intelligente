@@ -205,22 +205,6 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Vérifie si l'utilisateur peut ajouter des objets connectés
-     */
-    public function canAddObjects()
-    {
-        return in_array($this->level, ['advanced', 'expert']);
-    }
-
-    /**
-     * Vérifie si l'utilisateur peut demander la suppression d'un objet connecté
-     */
-    public function canRequestObjectDeletion()
-    {
-        return in_array($this->level, ['advanced', 'expert']);
-    }
-
-    /**
      * Relation avec l'objectif de consommation d'énergie
      */
     public function energyGoal()
