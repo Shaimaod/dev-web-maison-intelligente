@@ -3,16 +3,24 @@
 @section('content')
 <div id="connected-objects-app">
     <div class="container py-4">
-        <div class="row mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">Objets Connectés</h1>
+            @if(auth()->user()->level === 'advanced' || auth()->user()->level === 'expert')
+            <a href="{{ route('connected.objects.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Ajouter un objet
+            </a>
+            @endif
+        </div>
+        <div class="row g-3 mb-4">
             <div class="col-md-6">
                 <input type="text" 
                        class="form-control" 
                        v-model="query" 
-                       @input="fetchObjects"
+                       @input="debounceSearch"
                        placeholder="Rechercher un objet...">
             </div>
             <div class="col-md-4">
-                <select class="form-control" v-model="category" @change="fetchObjects">
+                <select class="form-select" v-model="category" @change="fetchObjects">
                     <option value="">Toutes les catégories</option>
                     <option value="Éclairage">Éclairage</option>
                     <option value="Climatisation">Climatisation</option>
@@ -40,12 +48,12 @@
             <p class="text-muted">Essayez de modifier vos critères de recherche</p>
         </div>
 
-        <div v-else class="row">
-            <div v-for="item in objects" :key="item.id" class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-img-container">
+        <div v-else class="row g-4">
+            <div v-for="item in objects" :key="item.id" class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-img-container position-relative">
                         <img :src="getObjectImage(item)" class="card-img-top" :alt="item.name">
-                        <span :class="['status-badge', item.status === 'Actif' ? 'active' : 'inactive']" v-text="item.status"></span>
+                        <span :class="['status-badge', item.status === 'Actif' ? 'bg-success' : 'bg-danger']" v-text="item.status"></span>
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-3">
@@ -58,9 +66,6 @@
                             <p class="mb-1"><i class="fas fa-plug me-2"></i><span v-text="item.connectivity"></span></p>
                             <p v-if="item.current_temp" class="mb-1">
                                 <i class="fas fa-thermometer-half me-2"></i><span v-text="item.current_temp"></span>
-                            </p>
-                            <p class="mb-0">
-                                <i class="fas fa-clock me-2"></i>Dernière interaction : <span v-text="formatDate(item.last_interaction)"></span>
                             </p>
                         </div>
                     </div>
@@ -122,7 +127,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 category: '',
                 currentPage: 1,
                 lastPage: 1,
-                error: null
+                error: null,
+                searchTimeout: null
             }
         },
         methods: {
@@ -132,12 +138,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (item.image.startsWith('http')) {
                         return item.image;
                     }
-                    // Si l'image commence par 'connected_objects/', c'est un chemin local
-                    if (item.image.startsWith('connected_objects/')) {
-                        return `/storage/${item.image}`;
-                    }
-                    // Sinon, supposer que c'est un chemin local complet
-                    return `/storage/connected_objects/${item.image}`;
+                    // Sinon, utiliser le chemin stocké directement
+                    return `/storage/${item.image}`;
                 }
                 return defaultImages[item.category] || '/images/default-objects/default.svg';
             },
@@ -151,37 +153,58 @@ document.addEventListener('DOMContentLoaded', function() {
                     minute: '2-digit'
                 });
             },
+            debounceSearch() {
+                // Annuler le timeout précédent s'il existe
+                if (this.searchTimeout) {
+                    clearTimeout(this.searchTimeout);
+                }
+                
+                // Définir un nouveau timeout pour retarder la recherche
+                this.searchTimeout = setTimeout(() => {
+                    this.currentPage = 1; // Réinitialiser à la première page
+                    this.fetchObjects();
+                }, 500); // Attendre 500ms après la dernière frappe
+            },
             async fetchObjects() {
                 console.log('Début de fetchObjects');
                 this.loading = true;
-                try {
-                    // Construire l'URL avec les paramètres de recherche
-                    const params = new URLSearchParams({
-                        page: this.currentPage,
-                        query: this.query,
-                        category: this.category
-                    });
+                this.error = null;
+                
+                const params = new URLSearchParams({
+                    page: this.currentPage,
+                    query: this.query,
+                    category: this.category
+                });
 
-                    console.log('Envoi de la requête à /api/objects avec les paramètres:', params.toString());
-                    const response = await fetch(`/api/objects?${params.toString()}`);
-                    console.log('Réponse reçue', response);
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    console.log('Données reçues', data);
-                    
-                    this.objects = data.data;
-                    this.currentPage = data.current_page;
-                    this.lastPage = data.last_page;
-                } catch (error) {
-                    console.error('Erreur lors de la récupération des objets:', error);
-                    this.error = 'Une erreur est survenue lors de la récupération des objets.';
-                } finally {
-                    this.loading = false;
+                console.log('Envoi de la requête à /get-objects avec les paramètres:', params.toString());
+                const response = await fetch(`/get-objects?${params.toString()}`, {
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
+                console.log('Réponse reçue', response);
+                
+                if (response.status === 401) {
+                    // Rediriger vers la page de connexion si non authentifié
+                    window.location.href = '/login';
+                    return;
                 }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Données reçues', data);
+                
+                this.objects = data.data;
+                this.currentPage = data.current_page;
+                this.lastPage = data.last_page;
+                this.loading = false;
             },
             prevPage() {
                 if (this.currentPage > 1) {
@@ -231,7 +254,6 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .card-img-container {
-    position: relative;
     height: 200px;
     overflow: hidden;
 }
@@ -250,19 +272,6 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius: 15px;
     color: white;
     font-size: 0.8rem;
-}
-
-.status-badge.active {
-    background-color: #28a745;
-}
-
-.status-badge.inactive {
-    background-color: #dc3545;
-}
-
-.badge {
-    font-size: 0.9rem;
-    padding: 0.5em 0.8em;
 }
 
 .page-link {

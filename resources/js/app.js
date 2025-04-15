@@ -1,3 +1,4 @@
+import './bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap';
 import { createApp } from 'vue';
@@ -6,9 +7,17 @@ import { createApp } from 'vue';
 window.Vue = { createApp };
 window.createApp = createApp;
 
-// Importer les composants et les directives si nécessaire
-// import ExampleComponent from './components/ExampleComponent.vue';
+// Bootstrap initialization for tooltips and popovers
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize all tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
 
-// Supprimer la création et le montage de l'application Vue.js
-// const app = createApp({...});
-// app.mount('#app');
+    // Initialize all popovers
+    const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl);
+    });
+});

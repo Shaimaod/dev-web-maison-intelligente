@@ -1,15 +1,17 @@
-/* Variables globales */
+/* Variables globales - Using Bootstrap's theme colors for consistency */
 :root {
-    --primary-color: #4e73df;
-    --secondary-color: #858796;
-    --success-color: #1cc88a;
-    --info-color: #36b9cc;
-    --warning-color: #f6c23e;
-    --danger-color: #e74a3b;
-    --light-color: #f8f9fc;
-    --dark-color: #5a5c69;
-    --border-radius: 0.35rem;
-    --box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --info-color: #0dcaf0;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    --border-radius: 0.375rem;
+    --box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --box-shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    --transition: all 0.3s ease;
 }
 
 /* Styles généraux */
@@ -20,11 +22,11 @@ body {
 
 /* Hero Section */
 .hero-section {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #224abe 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0a58ca 100%);
     color: white;
-    padding: 4rem 0;
+    padding: 5rem 0;
     margin-bottom: 3rem;
-    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    border-radius: 0 0 1rem 1rem;
 }
 
 .hero-content {
@@ -45,16 +47,18 @@ body {
     margin-bottom: 2rem;
 }
 
-/* Cards */
+/* Cards with improved hover effects */
 .card {
+    transition: var(--transition);
     border: none;
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
-    transition: transform 0.3s ease;
+    overflow: hidden;
 }
 
 .card:hover {
     transform: translateY(-5px);
+    box-shadow: var(--box-shadow-lg);
 }
 
 .card-header {
@@ -72,24 +76,31 @@ body {
     padding: 4rem 0;
 }
 
+/* Feature cards with consistent styling */
 .feature-card {
     text-align: center;
     padding: 2rem;
+    height: 100%;
     background: white;
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
-    transition: all 0.3s ease;
+    transition: var(--transition);
 }
 
 .feature-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.15);
+    box-shadow: var(--box-shadow-lg);
 }
 
 .feature-icon {
     font-size: 2.5rem;
     color: var(--primary-color);
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    transition: var(--transition);
+}
+
+.feature-card:hover .feature-icon {
+    transform: scale(1.2);
 }
 
 /* Search Section */
@@ -121,23 +132,28 @@ body {
     margin-top: 2rem;
 }
 
+/* Object cards with modern design */
 .object-card {
-    background: white;
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    box-shadow: var(--box-shadow);
-    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
-.object-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.15);
+.object-image-container {
+    height: 200px;
+    overflow: hidden;
+    position: relative;
 }
 
 .object-image {
     width: 100%;
-    height: 200px;
+    height: 100%;
     object-fit: cover;
+    transition: var(--transition);
+}
+
+.object-card:hover .object-image {
+    transform: scale(1.05);
 }
 
 .object-info {
@@ -156,19 +172,31 @@ body {
     margin-bottom: 1rem;
 }
 
-/* Buttons */
+.status-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    z-index: 1;
+}
+
+/* Buttons with gradient and hover effects */
 .btn-primary {
-    background: linear-gradient(45deg, var(--primary-color) 0%, #224abe 100%);
+    background: linear-gradient(45deg, var(--primary-color), #0a58ca);
     border: none;
     padding: 0.75rem 1.5rem;
-    border-radius: var(--border-radius);
+    border-radius: 0.5rem;
     font-weight: 500;
-    transition: all 0.3s ease;
+    transition: var(--transition);
 }
 
 .btn-primary:hover {
-    background: linear-gradient(45deg, #224abe 0%, var(--primary-color) 100%);
+    background: linear-gradient(45deg, #0a58ca, var(--primary-color));
     transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(var(--primary-color), 0.15);
 }
 
 /* Responsive Design */
@@ -184,4 +212,8 @@ body {
     .object-grid {
         grid-template-columns: 1fr;
     }
-} 
+    
+    .feature-card {
+        margin-bottom: 1.5rem;
+    }
+}

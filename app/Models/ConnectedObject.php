@@ -15,7 +15,6 @@ class ConnectedObject extends Model
         'house_id',
         'name',
         'description',
-        'image',
         'category',
         'room',
         'brand',
@@ -24,19 +23,14 @@ class ConnectedObject extends Model
         'connectivity',
         'battery',
         'mode',
-        'current_temp',
-        'target_temp',
-        'last_interaction',
-        'settings',
-        'schedule',
-        'is_automated'
+        'is_automated',
+        'image',
     ];
 
     protected $casts = [
         'settings' => 'array',
         'schedule' => 'array',
-        'is_automated' => 'boolean',
-        'last_interaction' => 'datetime'
+        'is_automated' => 'boolean'
     ];
 
     /**

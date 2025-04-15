@@ -6,6 +6,8 @@
 <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
     @csrf
 
+    <h1 class="h3 mb-3 fw-normal">Inscrivez-vous sur Connect’Toit</h1>
+
     <div class="mb-4">
         <label for="surname" class="form-label">Prénom</label>
         <div class="input-group">
@@ -196,6 +198,7 @@
 <a href="{{ route('login') }}">
     Déjà inscrit ? Se connecter
 </a>
+<p class="mt-5 mb-3 text-muted">&copy; {{ date('Y') }} Connect’Toit. Tous droits réservés.</p>
 @endsection
 
 @push('scripts')

@@ -16,7 +16,7 @@ class ConnectedObjectSeeder extends Seeder
 
         if (!$house) {
             $house = House::create([
-                'name' => 'Maison Connectée',
+                'name' => 'Connect\'Toit',
                 'address' => '123 Rue de la Technologie, 75000 Paris',
                 'description' => 'La maison connectée par défaut du système'
             ]);
@@ -53,7 +53,7 @@ class ConnectedObjectSeeder extends Seeder
                 'current_temp' => '21°C',
                 'target_temp' => '20°C',
                 'is_automated' => true,
-                'image' => 'thermostat.jpg'
+                'image' => 'connected_objects/thermostat.jpg'
             ],
             [
                 'name' => 'Caméra de Sécurité',
@@ -65,7 +65,7 @@ class ConnectedObjectSeeder extends Seeder
                 'status' => 'Actif',
                 'connectivity' => 'Wi-Fi',
                 'is_automated' => true,
-                'image' => 'camera.png'
+                'image' => 'connected_objects/camera.png'
             ],
             [
                 'name' => 'Éclairage Intelligent',
@@ -77,7 +77,7 @@ class ConnectedObjectSeeder extends Seeder
                 'status' => 'Actif',
                 'connectivity' => 'Zigbee',
                 'is_automated' => true,
-                'image' => 'ampoule-intelligente.jpg'
+                'image' => 'connected_objects/ampoule-intelligente.jpg'
             ],
             [
                 'name' => 'Prise Connectée',
@@ -89,7 +89,7 @@ class ConnectedObjectSeeder extends Seeder
                 'status' => 'Actif',
                 'connectivity' => 'Wi-Fi',
                 'is_automated' => true,
-                'image' => 'prise-intelligente.jpg'
+                'image' => 'connected_objects/prise-intelligente.jpg'
             ],
             [
                 'name' => 'Détecteur de Fumée',
@@ -101,7 +101,7 @@ class ConnectedObjectSeeder extends Seeder
                 'status' => 'Actif',
                 'connectivity' => 'Wi-Fi',
                 'is_automated' => true,
-                'image' => 'detecteur.jpg'
+                'image' => 'connected_objects/detecteur.jpg'
             ]
         ];
 

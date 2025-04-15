@@ -7,7 +7,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Maison Connectée') }}</title>
+    <title>{{ config('app.name', 'Connect’Toit') }}</title>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.bunny.net">
@@ -74,7 +74,7 @@
             <div class="container">
                 <!-- Redirige vers le tableau de bord connecté si l'utilisateur est authentifié -->
                 <a class="navbar-brand" href="{{ Auth::check() ? route('dashboard.connected') : url('/') }}">
-                    {{ config('app.name', 'Maison Connectée') }}
+                    {{ config('app.name', 'Connect’Toit') }}
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
@@ -152,6 +152,9 @@
             @yield('content')
         </main>
     </div>
+    <footer class="text-center py-4">
+        <p>&copy; {{ date('Y') }} Connect’Toit. Tous droits réservés.</p>
+    </footer>
     @stack('scripts')
 </body>
 </html>

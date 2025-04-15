@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\ActivityLog;
 
 class ProfileController extends Controller
 {
@@ -139,6 +140,20 @@ class ProfileController extends Controller
     {
         $query = $request->input('query');
         
+        // Enregistrer l'activité de recherche
+        if (auth()->check() && !empty($query)) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action_type' => 'profile_search',
+                'description' => 'Recherche de profils',
+                'details' => [
+                    'query' => $query,
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent()
+                ]
+            ]);
+        }
+        
         $users = User::when($query, function($q) use ($query) {
             return $q->where('name', 'like', "%{$query}%")
                     ->orWhere('username', 'like', "%{$query}%")
@@ -153,6 +168,21 @@ class ProfileController extends Controller
      */
     public function showProfile(User $user)
     {
+        // Enregistrer l'activité de visite de profil
+        if (auth()->check() && auth()->id() !== $user->id) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action_type' => 'profile_visit',
+                'description' => 'Visite du profil de ' . $user->name,
+                'details' => [
+                    'visited_user_id' => $user->id,
+                    'visited_user_name' => $user->name,
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent()
+                ]
+            ]);
+        }
+
         return view('profiles.show', compact('user'));
     }
 
@@ -161,6 +191,77 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         return view('profile.show', compact('user'));
+    }
+
+    /**
+     * Afficher l'historique des activités de l'utilisateur
+     */
+    public function activity()
+    {
+        $user = Auth::user();
+        $activities = $user->activityLogs()
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('profile.activity', compact('activities', 'user'));
+    }
+
+    public function searchProfiles(Request $request)
+    {
+        // Vérifier si des paramètres de recherche sont fournis
+        $searchDetails = [
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'role' => $request->input('role'),
+            'status' => $request->input('status'),
+            'per_page' => $request->input('per_page', 10)
+        ];
+
+        // Filtrer les valeurs nulles ou vides
+        $searchDetails = array_filter($searchDetails, function($value) {
+            return !is_null($value) && $value !== '';
+        });
+
+        // Ne pas enregistrer de log si tous les champs de recherche sont vides
+        if (auth()->check() && !empty($searchDetails) && count($searchDetails) > 1) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action_type' => 'profile_search',
+                'description' => 'Recherche de profils',
+                'details' => $searchDetails
+            ]);
+        }
+
+        $validated = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|string|email|max:255',
+            'role' => 'nullable|string|max:255',
+            'status' => 'nullable|string|in:active,inactive',
+            'per_page' => 'nullable|integer|min:1|max:100'
+        ]);
+
+        $query = User::query();
+
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->input('name') . '%');
+        }
+
+        if ($request->filled('email')) {
+            $query->where('email', 'like', '%' . $request->input('email') . '%');
+        }
+
+        if ($request->filled('role')) {
+            $query->where('role', $request->input('role'));
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        $perPage = $request->input('per_page', 10);
+        $profiles = $query->paginate($perPage);
+
+        return response()->json($profiles);
     }
 }
 
