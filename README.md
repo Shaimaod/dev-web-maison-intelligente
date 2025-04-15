@@ -46,20 +46,16 @@ Une application web de gestion d'objets connectés pour maison intelligente, per
    php artisan migrate:fresh --seed
    ```
 
-6. Copier le '.env'
-
-7. Gérer les problèmes de permission :
+6. Gérer les problèmes de permission :
    ```bash
    sudo chown -R $USER:$USER /home/cytech/dev-web-maison-intelligente-maste/dev-web-maison-intelligente-master/node_modules
    ```
 
-8. Lancer le serveur local :
+7. Lancer le serveur local :
    ```bash
    php artisan serve
    npm run dev
    ```
-
-6. Configurez votre base de données dans le fichier `.env`
 
 L'application sera accessible à l'adresse : http://localhost:8000
 
