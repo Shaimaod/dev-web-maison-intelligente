@@ -48,7 +48,12 @@ Une application web de gestion d'objets connectés pour maison intelligente, per
 
 6. Copier le '.env'
 
-7. Lancer le serveur local :
+7. Gérer les problèmes de permission :
+   ```bash
+   sudo chown -R $USER:$USER /home/cytech/dev-web-maison-intelligente-maste/dev-web-maison-intelligente-master/node_modules
+   ```
+
+8. Lancer le serveur local :
    ```bash
    php artisan serve
    npm run dev
