@@ -42,6 +42,15 @@ class ConnectedObjectController extends Controller
         return view('freetour');  // Vue pour freetour
     }
 
+    /**
+     * Affiche le formulaire pour créer un nouvel objet connecté
+     */
+    public function create()
+    {
+        $this->authorize('create', ConnectedObject::class);
+        return view('connected-objects.create');
+    }
+
     // Méthode pour afficher la vue de recherche des objets connectés pour dashboard.connected
     public function dashboardConnected()
     {
@@ -386,21 +395,36 @@ class ConnectedObjectController extends Controller
             'room' => 'required|string|max:255',
             'brand' => 'required|string|max:255',
             'type' => 'required|string|max:255',
-            'status' => 'required|string|max:255',
+            'status' => 'required|string|in:Actif,Inactif',  // Assurez-vous que c'est bien in:Actif,Inactif 
             'connectivity' => 'required|string|max:255',
             'battery' => 'nullable|integer|min:0|max:100',
-            'mode' => 'required|string|max:255',
+            'mode' => 'nullable|string|max:255',  // Modifié de required à nullable
             'current_temp' => 'nullable|numeric',
             'target_temp' => 'nullable|numeric',
             'last_interaction' => 'nullable|date',
             'settings' => 'nullable|json',
             'schedule' => 'nullable|json',
-            'is_automated' => 'boolean'
+            'is_automated' => 'boolean|nullable'  // Ajout de nullable
         ]);
 
         $data = $request->all();
-        $data['house_id'] = Auth::user()->house_id;
+        
+        // Si l'utilisateur est connecté et a une maison
+        if (Auth::check() && Auth::user()->house_id) {
+            $data['house_id'] = Auth::user()->house_id;
+        } else {
+            // Récupérer une maison par défaut si nécessaire
+            $defaultHouse = \App\Models\House::first();
+            if ($defaultHouse) {
+                $data['house_id'] = $defaultHouse->id;
+            } else {
+                return redirect()->back()
+                    ->with('error', 'Impossible de créer un objet sans maison associée.')
+                    ->withInput();
+            }
+        }
 
+        // Traitement de l'image
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $imageName = time() . '_' . $image->getClientOriginalName();
@@ -408,7 +432,23 @@ class ConnectedObjectController extends Controller
             $data['image'] = 'connected_objects/' . $imageName;
         }
 
+        // Traitement des valeurs booléennes
+        $data['is_automated'] = $request->has('is_automated');
+
+        // Création de l'objet
         $connectedObject = ConnectedObject::create($data);
+
+        // Enregistrer dans le log d'activité
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action_type' => 'object_added',
+            'description' => 'Ajout d\'un nouvel objet connecté',
+            'details' => [
+                'object_id' => $connectedObject->id,
+                'object_name' => $connectedObject->name,
+                'object_category' => $connectedObject->category,
+            ]
+        ]);
 
         return redirect()->route('dashboard.connected')
             ->with('success', 'Objet connecté créé avec succès.');
@@ -444,7 +484,7 @@ class ConnectedObjectController extends Controller
             // L'autorisation est déjà vérifiée dans le middleware du constructeur
             
             $validated = $request->validate([
-                'status' => 'nullable|string|max:255',
+                'status' => 'nullable|string|in:Actif,Inactif', // Modifié pour accepter explicitement Actif et Inactif
                 'mode' => 'nullable|string|max:255',
                 'brightness' => 'nullable|integer|min:0|max:100',
                 'color' => 'nullable|string|max:7',
@@ -484,6 +524,13 @@ class ConnectedObjectController extends Controller
                 'object' => $object
             ]);
         } catch (\Exception $e) {
+            // Ajouter un log d'erreur pour le débogage
+            Log::error('Erreur lors de la mise à jour de l\'objet: ' . $e->getMessage(), [
+                'object_id' => $id,
+                'request_data' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'message' => 'Erreur lors de la mise à jour de l\'objet',
                 'error' => $e->getMessage()

@@ -59,6 +59,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Route pour la page des objets connectés
     Route::get('/connected-objects', [ConnectedObjectController::class, 'showConnectedObjects'])->name('connected.objects');
+
+    // Ajouter cette route quelque part dans le groupe middleware 'auth'
+    Route::post('/connected-objects/create-default', [App\Http\Controllers\DefaultObjectController::class, 'createDefault'])
+        ->name('connected.objects.create-default');
 });
 
 /*

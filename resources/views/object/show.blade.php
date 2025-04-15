@@ -340,7 +340,7 @@
                                             <label class="form-label">Volume</label>
                                             <input type="range" class="form-range" id="volumeInput" min="0" max="100" value="{{ $object->volume ?? 50 }}">
                                             <div class="d-flex justify-content-between">
-                                                <small>0%</</small>
+                                                <small>0%</small>
                                                 <small id="volumeValue">{{ $object->volume ?? 50 }}%</small>
                                                 <small>100%</small>
                                             </div>
@@ -399,10 +399,14 @@
 
                     <!-- Formulaire d'édition -->
                     <div id="editView" style="display: none;">
-                        <form action="{{ route('object.update', $object->id) }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('object.updateForEdit', $object->id) }}" method="POST" enctype="multipart/form-data" id="editObjectForm">
                             @csrf
                             @method('PUT')
                             
+                            <!-- Champ caché pour identifier la soumission du formulaire -->
+                            <input type="hidden" name="form_submit" value="true">
+                            
+                            <!-- Continuez avec les champs du formulaire existants -->
                             <div class="mb-3">
                                 <label for="name" class="form-label">Nom de l'objet</label>
                                 <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $object->name) }}" required>
@@ -424,10 +428,12 @@
                                     <label for="category" class="form-label">Catégorie</label>
                                     <select class="form-select @error('category') is-invalid @enderror" id="category" name="category" required>
                                         <option value="">Sélectionnez une catégorie</option>
-                                        <option value="lighting" {{ old('category', $object->category) == 'lighting' ? 'selected' : '' }}>Éclairage</option>
-                                        <option value="security" {{ old('category', $object->category) == 'security' ? 'selected' : '' }}>Sécurité</option>
-                                        <option value="climate" {{ old('category', $object->category) == 'climate' ? 'selected' : '' }}>Climatisation</option>
-                                        <option value="audio" {{ old('category', $object->category) == 'audio' ? 'selected' : '' }}>Audio</option>
+                                        <option value="Éclairage" {{ old('category', $object->category) == 'Éclairage' ? 'selected' : '' }}>Éclairage</option>
+                                        <option value="Sécurité" {{ old('category', $object->category) == 'Sécurité' ? 'selected' : '' }}>Sécurité</option>
+                                        <option value="Climatisation" {{ old('category', $object->category) == 'Climatisation' ? 'selected' : '' }}>Climatisation</option>
+                                        <option value="Audio" {{ old('category', $object->category) == 'Audio' ? 'selected' : '' }}>Audio</option>
+                                        <option value="Énergie" {{ old('category', $object->category) == 'Énergie' ? 'selected' : '' }}>Énergie</option>
+                                        <option value="Électroménager" {{ old('category', $object->category) == 'Électroménager' ? 'selected' : '' }}>Électroménager</option>
                                     </select>
                                     @error('category')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -437,10 +443,12 @@
                                     <label for="room" class="form-label">Pièce</label>
                                     <select class="form-select @error('room') is-invalid @enderror" id="room" name="room" required>
                                         <option value="">Sélectionnez une pièce</option>
-                                        <option value="living_room" {{ old('room', $object->room) == 'living_room' ? 'selected' : '' }}>Salon</option>
-                                        <option value="bedroom" {{ old('room', $object->room) == 'bedroom' ? 'selected' : '' }}>Chambre</option>
-                                        <option value="kitchen" {{ old('room', $object->room) == 'kitchen' ? 'selected' : '' }}>Cuisine</option>
-                                        <option value="bathroom" {{ old('room', $object->room) == 'bathroom' ? 'selected' : '' }}>Salle de bain</option>
+                                        <option value="Salon" {{ old('room', $object->room) == 'Salon' ? 'selected' : '' }}>Salon</option>
+                                        <option value="Chambre" {{ old('room', $object->room) == 'Chambre' ? 'selected' : '' }}>Chambre</option>
+                                        <option value="Cuisine" {{ old('room', $object->room) == 'Cuisine' ? 'selected' : '' }}>Cuisine</option>
+                                        <option value="Salle de bain" {{ old('room', $object->room) == 'Salle de bain' ? 'selected' : '' }}>Salle de bain</option>
+                                        <option value="Couloir" {{ old('room', $object->room) == 'Couloir' ? 'selected' : '' }}>Couloir</option>
+                                        <option value="Bureau" {{ old('room', $object->room) == 'Bureau' ? 'selected' : '' }}>Bureau</option>
                                     </select>
                                     @error('room')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -501,19 +509,12 @@
                                 </div>
                             </div>
 
-                            @if(auth()->user()->level === 'expert')
-                                <div class="mb-3">
-                                    <label for="settings" class="form-label">Paramètres avancés (JSON)</label>
-                                    <textarea class="form-control @error('settings') is-invalid @enderror" id="settings" name="settings" rows="5">{{ old('settings', $object->settings) }}</textarea>
-                                    @error('settings')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                    <small class="form-text text-muted">Entrez les paramètres au format JSON valide.</small>
-                                </div>
-                            @endif
+                            <!-- Hidden inputs for status and mode -->
+                            <input type="hidden" name="status" value="{{ old('status', $object->status) }}">
+                            <input type="hidden" name="mode" value="{{ old('mode', $object->mode) }}">
 
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-primary" id="submitEditBtn">
                                     <i class="fas fa-save me-2"></i>Enregistrer les modifications
                                 </button>
                                 <button type="button" class="btn btn-secondary" id="cancelEditBtn">
@@ -528,220 +529,488 @@
     </div>
 </div>
 
+<!-- Ajout d'un script de débug pour le formulaire -->
+<script>
+    document.getElementById('editObjectForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Empêcher la soumission par défaut
+        
+        console.log('Formulaire soumis avec les données suivantes:');
+        const formData = new FormData(this);
+        const formDataObj = {};
+        
+        // Copier les valeurs des contrôles actuels dans le formulaire
+        const statusValue = document.getElementById('statusSelect').value;
+        const modeValue = document.getElementById('modeSelect').value;
+        
+        // Mettre à jour les champs cachés
+        document.querySelector('input[name="status"]').value = statusValue;
+        document.querySelector('input[name="mode"]').value = modeValue;
+        
+        for (let pair of formData.entries()) {
+            formDataObj[pair[0]] = pair[1];
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+        
+        // Ajouter des messages d'attente pour l'utilisateur
+        const submitBtn = document.getElementById('submitEditBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Mise à jour en cours...';
+        
+        // Envoyer la requête
+        fetch(this.action, {
+            method: 'POST', // Le formulaire utilise POST avec _method=PUT
+            body: formData
+        })
+        .then(response => {
+            console.log('Réponse du serveur:', response);
+            
+            // Vérifier si la réponse est une redirection
+            if (response.redirected) {
+                // En cas de redirection (succès), simplement naviguer vers l'URL de redirection
+                window.location.href = response.url;
+                return Promise.reject('Redirection'); // On interrompt la chaîne de promesses
+            }
+            
+            // Si ce n'est pas une redirection, on peut tenter de parser en JSON
+            if (response.headers.get('content-type')?.includes('application/json')) {
+                if (!response.ok) {
+                    if (response.status === 422) {
+                        // Erreurs de validation
+                        return response.json().then(data => {
+                            throw new Error(Object.values(data.errors).flat().join('\n'));
+                        });
+                    }
+                    throw new Error('Erreur lors de la mise à jour (status: ' + response.status + ')');
+                }
+                return response.json();
+            }
+            
+            // Si ce n'est pas du JSON et pas de redirection, afficher un message de succès générique
+            if (response.ok) {
+                showToast('Succès', 'Objet mis à jour avec succès', 'success');
+                // Recharger la page après la mise à jour
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+                return Promise.reject('Success'); // On interrompt la chaîne de promesses
+            }
+            
+            throw new Error('Erreur lors de la mise à jour (status: ' + response.status + ')');
+        })
+        .then(data => {
+            // On ne devrait arriver ici que si la réponse est du JSON valide
+            showToast('Succès', data.message || 'Objet mis à jour avec succès', 'success');
+            console.log('Réponse complète:', data);
+            
+            // Recharger la page après la mise à jour
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        })
+        .catch(error => {
+            // Ne pas traiter les "erreurs" de redirection ou de succès
+            if (error === 'Redirection' || error === 'Success') return;
+            
+            console.error('Erreur:', error);
+            showToast('Erreur', error.message || 'Une erreur est survenue lors de la mise à jour', 'error');
+        })
+        .finally(() => {
+            // Ne réactive le bouton que si on n'a pas été redirigé
+            if (!document.hidden) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    });
+</script>
+
 <div class="toast-container" id="toastContainer"></div>
 
 @push('scripts')
 <script>
-function showToast(message, type = 'success') {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle text-success' : 'exclamation-circle text-danger'}"></i>
-        <span>${message}</span>
-    `;
-    container.appendChild(toast);
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
-
-function adjustTemperature(change) {
-    const input = document.getElementById('temperatureInput');
-    const newValue = parseFloat(input.value) + change;
-    if (newValue >= 16 && newValue <= 30) {
-        input.value = newValue;
-        document.getElementById('targetTempDisplay').textContent = newValue + '°C';
+    // Fonction pour afficher des messages toast
+    function showToast(title, message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle text-success' : 'exclamation-circle text-danger'}"></i>
+            <span><strong>${title}</strong> ${message}</span>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
     }
-}
 
-function updateObject() {
-    const button = document.getElementById('updateButton');
-    const spinner = document.getElementById('loadingSpinner');
-    button.disabled = true;
-    spinner.style.display = 'inline-block';
-
-    // Capturer la valeur actuelle du slider de température avant l'envoi
-    @if($object->category === 'Climatisation')
-    const selectedTemperature = document.getElementById('temperatureInput').value;
-    console.log('Température sélectionnée avant envoi:', selectedTemperature);
-    @endif
-
-    const data = {
-        status: document.getElementById('statusSelect').value,
-        mode: document.getElementById('modeSelect').value,
-    };
-
-    // Ajouter les données spécifiques selon la catégorie
-    @if($object->category === 'Éclairage')
-        data.brightness = document.getElementById('brightnessInput').value;
-        data.color = document.getElementById('colorInput').value;
-    @endif
-
-    @if($object->category === 'Sécurité')
-        data.surveillance_mode = document.getElementById('surveillanceMode').value;
-        data.sensitivity = document.getElementById('sensitivityInput').value;
-    @endif
-
-    @if($object->category === 'Audio')
-        data.volume = document.getElementById('volumeInput').value;
-        data.audio_source = document.getElementById('audioSource').value;
-    @endif
-
-    @if($object->category === 'Climatisation')
-        data.target_temp = selectedTemperature; // Utiliser la variable capturée
-    @endif
-
-    // Envoyer les données au serveur
-    fetch('/object/{{ $object->id }}', {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Erreur lors de la mise à jour');
+    // Fonction pour ajuster la température
+    function adjustTemperature(change) {
+        const input = document.getElementById('temperatureInput');
+        const newValue = parseFloat(input.value) + change;
+        
+        if (newValue >= 16 && newValue <= 30) {
+            input.value = newValue;
+            document.getElementById('targetTempDisplay').textContent = newValue + '°C';
+            updateTemperature(newValue);
         }
-        return response.json();
-    })
-    .then(data => {
-        // Mettre à jour l'interface
-        document.getElementById('status').textContent = data.object.status;
-        document.getElementById('status').className = 'status-badge ' + (data.object.status === 'Actif' ? 'bg-success' : 'bg-danger');
-        document.getElementById('mode').textContent = data.object.mode;
+    }
 
+    // Fonction spécifique pour mettre à jour la température
+    function updateTemperature(temperature) {
+        console.log('Envoi de la température:', temperature);
+        
+        const tempData = {
+            target_temp: temperature
+        };
+        
+        fetch(`/object/{{ $object->id }}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(tempData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erreur lors de la mise à jour de la température');
+            }
+            return response.json();
+        })
+        .then(data => {
+            showToast('Succès', 'Température mise à jour avec succès', 'success');
+            console.log('Réponse mise à jour température:', data);
+            
+            // Mettre à jour l'interface
+            const targetTempElement = document.getElementById('target_temp');
+            if (targetTempElement) targetTempElement.textContent = temperature + '°C';
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            showToast('Erreur', 'Échec de la mise à jour de la température', 'error');
+        });
+    }
+
+    @if(auth()->user()->can('update', $object))
+    // Fonction pour mettre à jour un objet connecté
+    function updateObject() {
+        // Désactiver le bouton pendant la requête
+        const button = document.getElementById('updateButton');
+        const originalText = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Mise à jour...';
+
+        // Récupérer la valeur actuelle du slider de température
         @if($object->category === 'Climatisation')
-            // Afficher la réponse du serveur dans la console pour le débogage
-            console.log('Réponse complète du serveur:', JSON.stringify(data));
-            
-            // Mise à jour de la température actuelle si disponible
-            if (data.object.current_temp) {
-                const currentTemp = data.object.current_temp.replace('°C', ''); // Enlever °C s'il existe déjà
-                document.getElementById('current_temp').textContent = currentTemp + '°C';
-                document.getElementById('currentTempDisplay').textContent = currentTemp + '°C';
-            }
-            
-            // Vérifier si la réponse contient la température cible
-            if (data.object.target_temp !== undefined) {
-                // Le serveur retourne la température mais semble ne pas la mettre à jour correctement
-                // On va utiliser la valeur qu'on a envoyée plutôt que celle retournée par le serveur
-                console.log('Target temp from server:', data.object.target_temp);
-                console.log('Using selected temperature instead:', selectedTemperature);
-                
-                // Mettre à jour tous les éléments affichant la température cible
-                document.getElementById('target_temp').textContent = selectedTemperature + '°C';
-                document.getElementById('targetTempDisplay').textContent = selectedTemperature + '°C';
-                document.getElementById('temperatureInput').value = selectedTemperature;
-            } else {
-                // Si le serveur ne renvoie pas la valeur, utiliser celle qu'on a envoyée
-                console.log('Utilisation de la température sélectionnée:', selectedTemperature);
-                document.getElementById('target_temp').textContent = selectedTemperature + '°C';
-                document.getElementById('targetTempDisplay').textContent = selectedTemperature + '°C';
-                document.getElementById('temperatureInput').value = selectedTemperature;
-            }
+        const targetTemp = document.getElementById('temperatureInput').value;
+        console.log('Température à envoyer:', targetTemp);
         @endif
 
-        showToast('Modifications enregistrées avec succès !');
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('Une erreur est survenue lors de la mise à jour.', 'error');
-    })
-    .finally(() => {
-        button.disabled = false;
-        spinner.style.display = 'none';
-    });
-}
+        // Préparer les données à envoyer
+        const data = {
+            status: document.getElementById('statusSelect').value,
+            mode: document.getElementById('modeSelect').value,
+            form_submit: 'ajax' // Ajout d'un indicateur pour différencier les requêtes AJAX des soumissions de formulaire
+        };
 
-// Mettre à jour l'affichage des valeurs en temps réel
-document.querySelectorAll('input[type="range"]').forEach(input => {
-    input.addEventListener('input', function() {
-        const valueDisplay = document.getElementById(this.id + 'Value');
-        if (valueDisplay) {
-            valueDisplay.textContent = this.value + (this.id === 'sensitivityInput' ? '' : '%');
-        }
-    });
-});
+        console.log('Données avant envoi:', data);
 
-// Mettre à jour l'affichage de la température en temps réel
-const temperatureInput = document.getElementById('temperatureInput');
-if (temperatureInput) {
-    temperatureInput.addEventListener('input', function() {
-        document.getElementById('targetTempDisplay').textContent = this.value + '°C';
-    });
-}
+        // Ajouter les données spécifiques selon la catégorie
+        @if($object->category === 'Éclairage')
+            data.brightness = document.getElementById('brightnessInput').value;
+            data.color = document.getElementById('colorInput').value;
+        @endif
 
-document.addEventListener('DOMContentLoaded', function() {
-    const toggleViewBtn = document.getElementById('toggleViewBtn');
-    const cancelEditBtn = document.getElementById('cancelEditBtn');
-    const detailView = document.getElementById('detailView');
-    const editView = document.getElementById('editView');
+        @if($object->category === 'Sécurité')
+            data.surveillance_mode = document.getElementById('surveillanceMode').value;
+            data.sensitivity = document.getElementById('sensitivityInput').value;
+        @endif
 
-    // Ensure toggleViewBtn exists before adding event listeners
-    if (toggleViewBtn) {
-        toggleViewBtn.addEventListener('click', function() {
-            detailView.style.display = 'none';
-            editView.style.display = 'block';
-            toggleViewBtn.style.display = 'none';
-        });
-    }
+        @if($object->category === 'Audio')
+            data.volume = document.getElementById('volumeInput').value;
+            data.audio_source = document.getElementById('audioSource').value;
+        @endif
 
-    if (cancelEditBtn) {
-        cancelEditBtn.addEventListener('click', function() {
-            detailView.style.display = 'block';
-            editView.style.display = 'none';
-            if (toggleViewBtn) {
-                toggleViewBtn.style.display = 'block';
+        @if($object->category === 'Climatisation')
+            // S'assurer que la température est bien formatée
+            data.target_temp = targetTemp + '°C';
+        @endif
+
+        // Envoyer la requête AJAX avec le bon format de données
+        fetch(`/object/{{ $object->id }}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erreur lors de la mise à jour');
             }
+            return response.json();
+        })
+        .then(responseData => {
+            // Afficher un message de succès
+            showToast('Succès', responseData.message, 'success');
+            // Debug - afficher la réponse complète dans la console
+            console.log('Réponse du serveur:', responseData);
+            // Mettre à jour l'interface utilisateur
+            updateUIAfterChange(data);
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            showToast('Erreur', 'Une erreur est survenue lors de la mise à jour.', 'error');
+        })
+        .finally(() => {
+            // Réactiver le bouton
+            button.disabled = false;
+            button.innerHTML = originalText;
         });
     }
-});
 
-function requestDeletion() {
-    if (!confirm('Êtes-vous sûr de vouloir demander la suppression de cet objet connecté ? Cette action ne peut pas être annulée.')) {
-        return;
+    // Fonction pour mettre à jour l'interface utilisateur après un changement
+    function updateUIAfterChange(data) {
+        console.log('Mise à jour de l\'interface avec:', data);
+
+        // Mettre à jour le statut s'il a été modifié
+        if (data.status) {
+            const statusElement = document.getElementById('status');
+            if (statusElement) statusElement.textContent = data.status;
+
+            // Mettre à jour la classe du badge de statut
+            const statusBadge = document.querySelector('.status-badge');
+            if (statusBadge) {
+                statusBadge.classList.remove('bg-success', 'bg-danger');
+                statusBadge.classList.add(data.status === 'Actif' ? 'bg-success' : 'bg-danger');
+            }
+        }
+
+        // Mettre à jour le mode s'il a été modifié
+        if (data.mode) {
+            const modeElement = document.getElementById('mode');
+            if (modeElement) {
+                modeElement.textContent = data.mode;
+                console.log('Mode mis à jour dans l\'interface:', data.mode);
+            }
+        }
+
+        // Mise à jour des autres éléments spécifiques à la catégorie
+        if (data.brightness) {
+            const brightnessElement = document.getElementById('brightness');
+            if (brightnessElement) brightnessElement.textContent = data.brightness + '%';
+        }
+
+        if (data.color) {
+            const colorElement = document.getElementById('color');
+            if (colorElement) {
+                colorElement.textContent = data.color;
+                const colorPreview = document.getElementById('colorPreview');
+                if (colorPreview) colorPreview.style.backgroundColor = data.color;
+            }
+        }
+
+        if (data.surveillance_mode) {
+            const surveillanceModeElement = document.getElementById('surveillance_mode');
+            if (surveillanceModeElement) surveillanceModeElement.textContent = data.surveillance_mode;
+        }
+
+        if (data.sensitivity) {
+            const sensitivityElement = document.getElementById('sensitivity');
+            if (sensitivityElement) sensitivityElement.textContent = data.sensitivity;
+        }
+
+        if (data.volume) {
+            const volumeElement = document.getElementById('volume');
+            if (volumeElement) volumeElement.textContent = data.volume + '%';
+        }
+
+        if (data.audio_source) {
+            const audioSourceElement = document.getElementById('audio_source');
+            if (audioSourceElement) audioSourceElement.textContent = data.audio_source;
+        }
+
+        if (data.target_temp) {
+            const targetTempElement = document.getElementById('target_temp');
+            if (targetTempElement) targetTempElement.textContent = data.target_temp;
+            // Mettre également à jour l'affichage du slider
+            const targetTempDisplayElement = document.getElementById('targetTempDisplay');
+            if (targetTempDisplayElement) targetTempDisplayElement.textContent = data.target_temp + '°C';
+        }
     }
 
-    const button = document.getElementById('requestDeletionButton');
-    button.disabled = true;
+    document.addEventListener('DOMContentLoaded', function() {
+        // Pour les changements de mode
+        const modeSelect = document.getElementById('modeSelect');
+        if (modeSelect) {
+            modeSelect.addEventListener('change', function() {
+                console.log('Mode sélectionné:', this.value);
 
-    fetch('{{ route("object.request-deletion", $object->id) }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({ reason: 'Demande utilisateur' })
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(data => {
-                throw new Error(data.message || 'Erreur lors de la demande de suppression');
+                // Pour tester immédiatement le changement de mode
+                const updateImmediately = true; // Changé pour mettre à jour immédiatement
+                if (updateImmediately) {
+                    const modeData = {
+                        mode: this.value
+                    };
+
+                    // Envoyer uniquement la mise à jour du mode
+                    fetch(`/object/{{ $object->id }}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(modeData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        showToast('Succès', 'Mode mis à jour avec succès', 'success');
+                        console.log('Réponse de mise à jour du mode:', data);
+
+                        // Mettre à jour l'affichage du mode
+                        const modeElement = document.getElementById('mode');
+                        if (modeElement) modeElement.textContent = modeData.mode;
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la mise à jour du mode:', error);
+                        showToast('Erreur', 'Échec de la mise à jour du mode', 'error');
+                    });
+                }
             });
         }
-        return response.json();
-    })
-    .then(data => {
-        showToast(data.message, 'success');
-        setTimeout(() => {
-            window.location.reload();
-        }, 2000);
-    })
-    .catch(error => {
-        console.error('Request error:', error);
-        showToast(error.message || 'Une erreur est survenue lors de la demande de suppression.', 'error');
-    })
-    .finally(() => {
-        button.disabled = false;
-    });
-}
 
-// Désactiver les contrôles si l'utilisateur n'a pas les droits
-@if(!auth()->user()->can('update', $object))
+        // Pour les changements de température
+        const temperatureInput = document.getElementById('temperatureInput');
+        if (temperatureInput) {
+            temperatureInput.addEventListener('input', function() {
+                document.getElementById('targetTempDisplay').textContent = this.value + '°C';
+            });
+
+            // Ajouter un écouteur pour le relâchement de la souris (fin d'ajustement)
+            temperatureInput.addEventListener('change', function() {
+                updateTemperature(this.value);
+            });
+        }
+
+        // Pour le basculement entre vue détaillée et vue d'édition
+        const toggleViewBtn = document.getElementById('toggleViewBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const detailView = document.getElementById('detailView');
+        const editView = document.getElementById('editView');
+
+        if (toggleViewBtn) {
+            toggleViewBtn.addEventListener('click', function() {
+                detailView.style.display = 'none';
+                editView.style.display = 'block';
+                this.style.display = 'none';
+            });
+        }
+
+        if (cancelEditBtn) {
+            cancelEditBtn.addEventListener('click', function() {
+                detailView.style.display = 'block';
+                editView.style.display = 'none';
+                if (toggleViewBtn) {
+                    toggleViewBtn.style.display = 'block';
+                }
+            });
+        }
+
+        // Ajouter une validation au formulaire d'édition
+        const editForm = document.getElementById('editObjectForm');
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                e.preventDefault(); // Empêcher la soumission normale
+                
+                // Créer un FormData à partir du formulaire
+                const formData = new FormData(this);
+                
+                // Convertir FormData en objet pour l'affichage de débogage
+                const formDataObj = {};
+                for (let [key, value] of formData.entries()) {
+                    formDataObj[key] = value;
+                }
+                console.log('Données du formulaire:', formDataObj);
+                
+                // Effectuer la requête fetch avec FormData
+                fetch(this.action, {
+                    method: 'POST', // Le formulaire utilise POST avec _method=PUT
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur lors de la mise à jour');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    showToast('Succès', 'Objet mis à jour avec succès', 'success');
+                    console.log('Réponse:', data);
+                    
+                    // Recharger la page après la mise à jour
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showToast('Erreur', 'Une erreur est survenue lors de la mise à jour', 'error');
+                });
+            });
+        }
+    });
+
+    function requestDeletion() {
+        if (!confirm('Êtes-vous sûr de vouloir demander la suppression de cet objet connecté ? Cette action ne peut pas être annulée.')) {
+            return;
+        }
+
+        const button = document.getElementById('requestDeletionButton');
+        button.disabled = true;
+
+        fetch('{{ route("object.request-deletion", $object->id) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ reason: 'Demande utilisateur' })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Erreur lors de la demande de suppression');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            showToast(data.message, 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        })
+        .catch(error => {
+            console.error('Request error:', error);
+            showToast(error.message || 'Une erreur est survenue lors de la demande de suppression.', 'error');
+        })
+        .finally(() => {
+            button.disabled = false;
+        });
+    }
+    @endif
+
+    @if(!auth()->user()->can('update', $object))
     document.addEventListener('DOMContentLoaded', function() {
         // Désactiver tous les contrôles de formulaire
         const formControls = document.querySelectorAll('input, select, button[type="button"]:not(.btn-back)');
@@ -749,15 +1018,33 @@ function requestDeletion() {
             control.disabled = true;
         });
     });
-@endif
+    @endif
 
-// Ajouter l'initialisation des tooltips pour l'info-bulle sur le bouton désactivé
-document.addEventListener('DOMContentLoaded', function() {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
+    // Ajouter l'initialisation des tooltips pour l'info-bulle sur le bouton désactivé
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
     });
-});
+
+    // Fonction utilisée pour basculer entre la vue détaillée et la vue d'édition
+    function toggleView() {
+        const detailView = document.getElementById('detailView');
+        const editView = document.getElementById('editView');
+        const toggleViewBtn = document.getElementById('toggleViewBtn');
+        
+        if (detailView && editView) {
+            detailView.style.display = 'none';
+            editView.style.display = 'block';
+            if (toggleViewBtn) {
+                toggleViewBtn.style.display = 'none';
+            }
+        }
+    }
 </script>
 @endpush
+
+<div id="loading-spinner" class="loading-spinner" style="display: none;"></div>
+
 @endsection

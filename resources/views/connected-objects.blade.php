@@ -6,9 +6,12 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="h3 mb-0">Objets Connectés</h1>
             @if(auth()->user()->can('create', App\Models\ConnectedObject::class))
-            <a href="{{ route('connected.objects.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>Ajouter un objet
-            </a>
+            <form action="{{ route('connected.objects.create-default') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Ajouter un objet
+                </button>
+            </form>
             @endif
         </div>
         

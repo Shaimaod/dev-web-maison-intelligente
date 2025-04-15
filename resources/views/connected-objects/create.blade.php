@@ -109,7 +109,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save me-2"></i>Ajouter l'objet
                             </button>
-                            <a href="{{ route('connected.objects.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('connected.objects') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left me-2"></i>Retour
                             </a>
                         </div>
@@ -119,4 +119,4 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection

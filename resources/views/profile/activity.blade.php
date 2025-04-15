@@ -321,32 +321,63 @@
                                                         </div>
                                                         <div class="modal-body">
                                                             <h5>Détails de l'activité</h5>
-                                                            <ul class="details-list">
-                                                                @if(isset($activity->details['object_id']))
-                                                                    <li><strong>Object ID:</strong> {{ $activity->details['object_id'] }}</li>
-                                                                @endif
-                                                                @if(isset($activity->details['object_name']))
-                                                                    <li><strong>Nom de l'objet:</strong> {{ $activity->details['object_name'] }}</li>
-                                                                @endif
-                                                                @if(isset($activity->details['object_category']))
-                                                                    <li><strong>Catégorie:</strong> {{ $activity->details['object_category'] }}</li>
-                                                                @endif
-                                                                @if(isset($activity->details['changes']))
-                                                                    <li><strong>Modifications:</strong></li>
-                                                                    <ul>
-                                                                        @php
-                                                                            $changes = is_string($activity->details['changes']) ? json_decode($activity->details['changes'], true) : $activity->details['changes'];
-                                                                        @endphp
-                                                                        @if(is_array($changes))
-                                                                            @foreach($changes as $key => $change)
-                                                                                <li>{{ ucfirst($key) }}: {{ $change['from'] }} → {{ $change['to'] }}</li>
-                                                                            @endforeach
-                                                                        @else
-                                                                            <li>Aucune modification disponible</li>
+                                                            @php
+                                                                // Correction du traitement des détails pour s'assurer qu'ils sont bien convertis
+                                                                $details = null;
+                                                                
+                                                                if (isset($activity->details)) {
+                                                                    if (is_string($activity->details)) {
+                                                                        $details = json_decode($activity->details, true);
+                                                                    } else {
+                                                                        $details = $activity->details;
+                                                                    }
+                                                                }
+                                                            @endphp
+                                                            
+                                                            @if(!empty($details))
+                                                                <ul class="details-list">
+                                                                    @foreach($details as $key => $value)
+                                                                        @if($key === 'changes')
+                                                                            <li><strong>Modifications:</strong>
+                                                                                <ul>
+                                                                                    @php
+                                                                                        $changes = is_string($value) ? json_decode($value, true) : $value;
+                                                                                    @endphp
+                                                                                    
+                                                                                    @if(is_array($changes))
+                                                                                        @foreach($changes as $fieldKey => $change)
+                                                                                            @if(is_array($change) && isset($change['from']) && isset($change['to']))
+                                                                                                <li>{{ ucfirst($fieldKey) }}: 
+                                                                                                    {{ is_array($change['from']) ? json_encode($change['from']) : $change['from'] }} 
+                                                                                                    → 
+                                                                                                    {{ is_array($change['to']) ? json_encode($change['to']) : $change['to'] }}
+                                                                                                </li>
+                                                                                            @endif
+                                                                                        @endforeach
+                                                                                    @else
+                                                                                        <li>Aucune modification détaillée disponible</li>
+                                                                                    @endif
+                                                                                </ul>
+                                                                            </li>
+                                                                        @elseif(!is_array($value))
+                                                                            <li><strong>{{ ucfirst(str_replace('_', ' ', $key)) }}:</strong> {{ $value }}</li>
+                                                                        @elseif(is_array($value))
+                                                                            <li>
+                                                                                <strong>{{ ucfirst(str_replace('_', ' ', $key)) }}:</strong>
+                                                                                <ul>
+                                                                                    @foreach($value as $subKey => $subValue)
+                                                                                        @if(!is_array($subValue))
+                                                                                            <li>{{ ucfirst(str_replace('_', ' ', $subKey)) }}: {{ $subValue }}</li>
+                                                                                        @endif
+                                                                                    @endforeach
+                                                                                </ul>
+                                                                            </li>
                                                                         @endif
-                                                                    </ul>
-                                                                @endif
-                                                            </ul>
+                                                                    @endforeach
+                                                                </ul>
+                                                            @else
+                                                                <p class="text-muted">Aucun détail disponible pour cette activité.</p>
+                                                            @endif
                                                         </div>
                                                     </div>
                                                 </div>

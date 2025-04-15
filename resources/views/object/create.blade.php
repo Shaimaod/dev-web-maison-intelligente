@@ -9,9 +9,71 @@
                     <h2 class="mb-0">Ajouter un nouvel objet connecté</h2>
                 </div>
 
+                <!-- Ajout d'une div pour afficher les logs -->
+                <div id="debug-logs" class="p-3 bg-light border-bottom" style="max-height: 200px; overflow: auto;">
+                    <h6>Logs de débogage</h6>
+                    <pre id="log-content" class="text-muted"></pre>
+                </div>
+
                 <div class="card-body">
-                    <form action="{{ route('connected.objects.store') }}" method="POST" enctype="multipart/form-data">
+                    <!-- Informations de débogage avancées -->
+                    <div class="alert alert-info mb-3">
+                        <h5>Informations de débogage</h5>
+                        <p class="mb-1"><strong>URL actuelle :</strong> {{ url()->current() }}</p>
+                        <p class="mb-1"><strong>Route actuelle :</strong> {{ Route::currentRouteName() ?? 'aucune' }}</p>
+                        <p class="mb-1"><strong>Méthode HTTP attendue :</strong> POST</p>
+                        <p class="mb-1"><strong>Routes disponibles :</strong></p>
+                        <ul class="mb-2">
+                        @php
+                            $routes = collect(\Route::getRoutes())->map(function($route) {
+                                return [
+                                    'uri' => $route->uri(),
+                                    'methods' => implode('|', $route->methods()),
+                                    'name' => $route->getName()
+                                ];
+                            })->filter(function($route) {
+                                return strpos($route['uri'], 'connected-objects') !== false;
+                            });
+                        @endphp
+                        @foreach($routes as $route)
+                            <li>{{ $route['methods'] }} - {{ $route['uri'] }} ({{ $route['name'] ?? 'sans nom' }})</li>
+                        @endforeach
+                        </ul>
+                        <p class="mb-0"><strong>Action du formulaire :</strong> {{ url('/connected-objects') }}</p>
+                    </div>
+                    
+                    <!-- Options de soumission du formulaire -->
+                    <div class="btn-group mb-3 w-100">
+                        <button id="submit-standard" class="btn btn-outline-primary">Méthode standard</button>
+                        <button id="submit-fetch" class="btn btn-outline-primary">Méthode fetch</button>
+                        <button id="submit-form-native" class="btn btn-outline-primary">Méthode native</button>
+                    </div>
+
+                    <!-- Ajout d'un formulaire alternatif sans JavaScript -->
+                    <form id="object-form-direct" action="{{ url('/connected-objects') }}" method="POST" enctype="multipart/form-data" style="display: none;">
                         @csrf
+                        <!-- Champs cachés qui seront remplis par JavaScript lors de la soumission -->
+                        @foreach(['name', 'category', 'description', 'room', 'brand', 'type', 'connectivity', 'mode', 'status', 'is_automated'] as $field)
+                        <input type="hidden" name="{{ $field }}" id="direct-{{ $field }}">
+                        @endforeach
+                    </form>
+                    
+                    <!-- Formulaire principal mais avec novalidate pour contrôler manuellement la validation -->
+                    <form id="object-form" action="{{ url('/connected-objects') }}" method="POST" enctype="multipart/form-data" novalidate>
+                        @csrf
+                        
+                        @if(session('error'))
+                            <div class="alert alert-danger mb-3">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+
+                        <!-- Informations de débogage -->
+                        <div class="alert alert-info mb-3">
+                            <p class="mb-1"><strong>URL actuelle :</strong> {{ url()->current() }}</p>
+                            <p class="mb-1"><strong>Route actuelle :</strong> {{ Route::currentRouteName() ?? 'aucune' }}</p>
+                            <p class="mb-0"><strong>Action du formulaire :</strong> {{ url('/connected-objects') }}</p>
+                        </div>
                         
                         <div class="row mb-3">
                             <div class="col-md-6">
@@ -160,11 +222,12 @@
                             </label>
                         </div>
 
+                        <!-- Ajout de boutons de soumission alternatifs -->
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-plus-circle me-2"></i>Ajouter l'objet
+                            <button type="submit" id="submit-normal" class="btn btn-primary">
+                                <i class="fas fa-plus-circle me-2"></i>Ajouter l'objet (standard)
                             </button>
-                            <a href="{{ route('connected.objects') }}" class="btn btn-secondary">
+                            <a href="{{ url('/connected-objects') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left me-2"></i>Retour à la liste
                             </a>
                         </div>
@@ -201,4 +264,143 @@
     background-color: var(--primary-dark);
     border-color: var(--primary-dark);
 }
-</style> 
+</style>
+@endpush
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function log(message) {
+            const logElement = document.getElementById('log-content');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        log('Page chargée, formulaire prêt');
+        log(`URL du formulaire: ${document.getElementById('object-form').action}`);
+        log('CSRF token présent: ' + (document.querySelector('meta[name="csrf-token"]') ? 'Oui' : 'Non'));
+        
+        // Tester la présence de la directive middleware VerifyCsrfToken
+        fetch("{{ url('/connected-objects') }}", {
+            method: 'HEAD',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        }).then(response => {
+            log(`Test de route: ${response.status} ${response.statusText}`);
+            log(`En-têtes de réponse: ${JSON.stringify([...response.headers].reduce((obj, [key, val]) => {
+                obj[key] = val;
+                return obj;
+            }, {}))}`);
+        });
+
+        // Méthode standard - seule la prévention par défaut
+        document.getElementById('submit-standard').addEventListener('click', function(e) {
+            e.preventDefault();
+            log('Soumission via méthode standard');
+            
+            // Vérifier les données avant envoi
+            const formData = new FormData(document.getElementById('object-form'));
+            let allValid = true;
+            
+            // Vérifier si tous les champs requis sont remplis
+            document.getElementById('object-form').querySelectorAll('[required]').forEach(el => {
+                if (!el.value) {
+                    log(`Champ requis manquant: ${el.name}`);
+                    el.classList.add('is-invalid');
+                    allValid = false;
+                } else {
+                    el.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!allValid) {
+                log('Validation échouée, formulaire non soumis');
+                return;
+            }
+            
+            log('Soumission du formulaire standard');
+            document.getElementById('object-form').submit();
+        });
+
+        // Méthode utilisant fetch
+        document.getElementById('submit-fetch').addEventListener('click', function(e) {
+            e.preventDefault();
+            log('Soumission via fetch avec suivi complet de la réponse');
+            
+            const formData = new FormData(document.getElementById('object-form'));
+            
+            fetch("{{ url('/connected-objects') }}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                log(`Réponse reçue: ${response.status} ${response.statusText}`);
+                log(`En-têtes de réponse: ${JSON.stringify([...response.headers].reduce((obj, [key, val]) => {
+                    obj[key] = val;
+                    return obj;
+                }, {}))}`);
+                
+                // Essayer de lire le corps de la réponse
+                return response.text().then(text => {
+                    try {
+                        // Si c'est du JSON, parsons-le
+                        const data = JSON.parse(text);
+                        log(`Réponse JSON: ${JSON.stringify(data)}`);
+                        return data;
+                    } catch (e) {
+                        // Sinon traitons-le comme du HTML
+                        log('Réponse HTML reçue');
+                        // Logique pour extraire les messages d'erreur du HTML
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(text, 'text/html');
+                        const errors = [...doc.querySelectorAll('.invalid-feedback, .alert-danger')].map(el => el.textContent.trim());
+                        if (errors.length) {
+                            log(`Erreurs trouvées dans HTML: ${errors.join(', ')}`);
+                        }
+                        if (response.redirected) {
+                            log(`Redirection détectée vers: ${response.url}`);
+                            window.location.href = response.url;
+                        }
+                        return { html: text };
+                    }
+                });
+            })
+            .catch(error => {
+                log(`Erreur: ${error.message}`);
+            });
+        });
+
+        // Méthode utilisant un formulaire natif direct (sans JS intermédiaire)
+        document.getElementById('submit-form-native').addEventListener('click', function(e) {
+            e.preventDefault();
+            log('Soumission via formulaire natif');
+            
+            // Copier toutes les valeurs du formulaire principal vers le formulaire direct
+            const formData = new FormData(document.getElementById('object-form'));
+            for (let [name, value] of formData.entries()) {
+                if (document.getElementById(`direct-${name}`)) {
+                    document.getElementById(`direct-${name}`).value = value;
+                }
+            }
+            
+            // Soumettre le formulaire direct
+            document.getElementById('object-form-direct').submit();
+        });
+
+        // Désactiver le comportement par défaut du formulaire
+        document.getElementById('object-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            log('Soumission standard interceptée');
+            document.getElementById('submit-standard').click();
+        });
+    });
+</script>
+@endpush
