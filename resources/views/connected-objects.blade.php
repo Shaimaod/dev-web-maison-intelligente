@@ -12,25 +12,14 @@
             @endif
         </div>
         <div class="row g-3 mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3 mb-0">Objets Connectés</h1>
-            @if(auth()->user()->level === 'advanced' || auth()->user()->level === 'expert')
-            <a href="{{ route('connected.objects.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>Ajouter un objet
-            </a>
-            @endif
-        </div>
-        <div class="row g-3 mb-4">
             <div class="col-md-6">
                 <input type="text" 
                        class="form-control" 
                        v-model="query" 
                        @input="debounceSearch"
-                       @input="debounceSearch"
                        placeholder="Rechercher un objet...">
             </div>
             <div class="col-md-4">
-                <select class="form-select" v-model="category" @change="fetchObjects">
                 <select class="form-select" v-model="category" @change="fetchObjects">
                     <option value="">Toutes les catégories</option>
                     <option value="Éclairage">Éclairage</option>
@@ -63,12 +52,7 @@
             <div v-for="item in objects" :key="item.id" class="col-md-4">
                 <div class="card h-100 shadow-sm">
                     <div class="card-img-container position-relative">
-        <div v-else class="row g-4">
-            <div v-for="item in objects" :key="item.id" class="col-md-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-img-container position-relative">
                         <img :src="getObjectImage(item)" class="card-img-top" :alt="item.name">
-                        <span :class="['status-badge', item.status === 'Actif' ? 'bg-success' : 'bg-danger']" v-text="item.status"></span>
                         <span :class="['status-badge', item.status === 'Actif' ? 'bg-success' : 'bg-danger']" v-text="item.status"></span>
                     </div>
                     <div class="card-body">
@@ -145,9 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 lastPage: 1,
                 error: null,
                 searchTimeout: null
-                error: null,
-                searchTimeout: null
-            }
+            };  // Fixed: Added semicolon here
         },
         methods: {
             getObjectImage(item) {
@@ -156,8 +138,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (item.image.startsWith('http')) {
                         return item.image;
                     }
-                    // Sinon, utiliser le chemin stocké directement
-                    return `/storage/${item.image}`;
                     // Sinon, utiliser le chemin stocké directement
                     return `/storage/${item.image}`;
                 }
@@ -185,18 +165,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     this.fetchObjects();
                 }, 500); // Attendre 500ms après la dernière frappe
             },
-            debounceSearch() {
-                // Annuler le timeout précédent s'il existe
-                if (this.searchTimeout) {
-                    clearTimeout(this.searchTimeout);
-                }
-                
-                // Définir un nouveau timeout pour retarder la recherche
-                this.searchTimeout = setTimeout(() => {
-                    this.currentPage = 1; // Réinitialiser à la première page
-                    this.fetchObjects();
-                }, 500); // Attendre 500ms après la dernière frappe
-            },
             async fetchObjects() {
                 console.log('Début de fetchObjects');
                 this.loading = true;
@@ -207,43 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     query: this.query,
                     category: this.category
                 });
-                this.error = null;
-                
-                const params = new URLSearchParams({
-                    page: this.currentPage,
-                    query: this.query,
-                    category: this.category
-                });
 
-                console.log('Envoi de la requête à /get-objects avec les paramètres:', params.toString());
-                const response = await fetch(`/get-objects?${params.toString()}`, {
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    credentials: 'same-origin'
-                });
-                console.log('Réponse reçue', response);
-                
-                if (response.status === 401) {
-                    // Rediriger vers la page de connexion si non authentifié
-                    window.location.href = '/login';
-                    return;
-                }
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                console.log('Données reçues', data);
-                
-                this.objects = data.data;
-                this.currentPage = data.current_page;
-                this.lastPage = data.last_page;
-                this.loading = false;
                 console.log('Envoi de la requête à /get-objects avec les paramètres:', params.toString());
                 const response = await fetch(`/get-objects?${params.toString()}`, {
                     headers: {
