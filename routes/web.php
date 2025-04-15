@@ -13,6 +13,8 @@ use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\DeletionRequestController;
 use App\Http\Controllers\EnergyController;
+use App\Http\Controllers\DeletionRequestController;
+use App\Http\Controllers\EnergyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,6 +55,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/object/{id}/edit', [ConnectedObjectController::class, 'edit'])->name('object.edit');
     Route::get('/object/{id}/edit', [ConnectedObjectController::class, 'edit'])->name('object.edit');
     Route::put('/object/{id}', [ConnectedObjectController::class, 'update'])->name('object.update');
+    Route::put('/object/{id}/updateForEdit', [ConnectedObjectController::class, 'updateForEdit'])->name('object.updateForEdit');
+    Route::get('/connected-objects/create', [ConnectedObjectController::class, 'create'])->name('connected.objects.create');
+    Route::post('/connected-objects', [ConnectedObjectController::class, 'store'])->name('connected.objects.store');
+    Route::post('/object/{id}/request-deletion', [DeletionRequestController::class, 'requestDeletion'])->name('object.request-deletion');
     Route::put('/object/{id}/updateForEdit', [ConnectedObjectController::class, 'updateForEdit'])->name('object.updateForEdit');
     Route::get('/connected-objects/create', [ConnectedObjectController::class, 'create'])->name('connected.objects.create');
     Route::post('/connected-objects', [ConnectedObjectController::class, 'store'])->name('connected.objects.store');
@@ -165,6 +171,21 @@ Route::middleware(['auth'])->group(function () {
 
     // Modifier le profil
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+
+    // Route pour afficher l'historique des actions de l'utilisateur
+    Route::get('/profile/activity', [ProfileController::class, 'activity'])->name('profile.activity');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Routes pour la gestion de l'énergie
+|--------------------------------------------------------------------------
+| Ces routes sont accessibles uniquement aux utilisateurs authentifiés.
+*/
+Route::middleware(['auth'])->group(function () {
+    Route::post('/energy/set-goal', [EnergyController::class, 'setGoal'])->name('energy.set-goal');
+    Route::get('/energy/history', [EnergyController::class, 'history'])->name('energy.history');
+    Route::get('/energy/details', [EnergyController::class, 'details'])->name('energy.details');
 
     // Route pour afficher l'historique des actions de l'utilisateur
     Route::get('/profile/activity', [ProfileController::class, 'activity'])->name('profile.activity');

@@ -12,6 +12,15 @@
             @endif
         </div>
         <div class="row g-3 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">Objets Connectés</h1>
+            @if(auth()->user()->level === 'advanced' || auth()->user()->level === 'expert')
+            <a href="{{ route('connected.objects.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Ajouter un objet
+            </a>
+            @endif
+        </div>
+        <div class="row g-3 mb-4">
             <div class="col-md-6">
                 <input type="text" 
                        class="form-control" 
@@ -21,6 +30,7 @@
                        placeholder="Rechercher un objet...">
             </div>
             <div class="col-md-4">
+                <select class="form-select" v-model="category" @change="fetchObjects">
                 <select class="form-select" v-model="category" @change="fetchObjects">
                     <option value="">Toutes les catégories</option>
                     <option value="Éclairage">Éclairage</option>
@@ -53,7 +63,12 @@
             <div v-for="item in objects" :key="item.id" class="col-md-4">
                 <div class="card h-100 shadow-sm">
                     <div class="card-img-container position-relative">
+        <div v-else class="row g-4">
+            <div v-for="item in objects" :key="item.id" class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-img-container position-relative">
                         <img :src="getObjectImage(item)" class="card-img-top" :alt="item.name">
+                        <span :class="['status-badge', item.status === 'Actif' ? 'bg-success' : 'bg-danger']" v-text="item.status"></span>
                         <span :class="['status-badge', item.status === 'Actif' ? 'bg-success' : 'bg-danger']" v-text="item.status"></span>
                     </div>
                     <div class="card-body">

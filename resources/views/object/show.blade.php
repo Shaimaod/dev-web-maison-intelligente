@@ -590,6 +590,52 @@
                                         <button class="temperature-btn" onclick="adjustTemperature(0.5)">
                                             <i class="fas fa-plus"></i>
                                         </button>
+                            @if($object->category === 'Audio')
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Volume</label>
+                                            <input type="range" class="form-range" id="volumeInput" min="0" max="100" value="{{ $object->volume ?? 50 }}">
+                                            <div class="d-flex justify-content-between">
+                                                <small>0%</</small>
+                                                <small id="volumeValue">{{ $object->volume ?? 50 }}%</small>
+                                                <small>100%</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Source audio</label>
+                                            <select class="form-select" id="audioSource">
+                                                <option value="Bluetooth" {{ $object->audio_source === 'Bluetooth' ? 'selected' : '' }}>Bluetooth</option>
+                                                <option value="WiFi" {{ $object->audio_source === 'WiFi' ? 'selected' : '' }}>WiFi</option>
+                                                <option value="Auxiliaire" {{ $object->audio_source === 'Auxiliaire' ? 'selected' : '' }}>Auxiliaire</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if($object->category === 'Climatisation')
+                                <div class="temperature-control">
+                                    <div class="temperature-display">
+                                        <span id="currentTempDisplay">{{ $object->current_temp }}</span>
+                                    </div>
+                                    <div class="temperature-range">
+                                        <input type="range" class="form-range" id="temperatureInput" min="16" max="30" value="{{ str_replace('°C', '', $object->target_temp ?? 20) }}" step="0.5">
+                                        <div class="temperature-labels">
+                                            <span>16°C</span>
+                                            <span id="targetTempDisplay">{{ $object->target_temp }}</span>
+                                            <span>30°C</span>
+                                        </div>
+                                    </div>
+                                    <div class="temperature-buttons">
+                                        <button class="temperature-btn" onclick="adjustTemperature(-0.5)">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <button class="temperature-btn" onclick="adjustTemperature(0.5)">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
                                     </div>
                                 </div>
                             @endif
@@ -931,6 +977,17 @@ function updateObject() {
     console.log('Température sélectionnée avant envoi:', selectedTemperature);
     @endif
 
+    const button = document.getElementById('updateButton');
+    const spinner = document.getElementById('loadingSpinner');
+    button.disabled = true;
+    spinner.style.display = 'inline-block';
+
+    // Capturer la valeur actuelle du slider de température avant l'envoi
+    @if($object->category === 'Climatisation')
+    const selectedTemperature = document.getElementById('temperatureInput').value;
+    console.log('Température sélectionnée avant envoi:', selectedTemperature);
+    @endif
+
     const data = {
         status: document.getElementById('statusSelect').value,
         mode: document.getElementById('modeSelect').value,
@@ -961,6 +1018,14 @@ function updateObject() {
     @if($object->category === 'Audio')
         data.volume = document.getElementById('volumeInput').value;
         data.audio_source = document.getElementById('audioSource').value;
+    @endif
+
+    @if($object->category === 'Climatisation')
+        data.target_temp = selectedTemperature; // Utiliser la variable capturée
+    @endif
+
+    // Envoyer les données au serveur
+    fetch('/object/{{ $object->id }}', {
     @endif
 
     @if($object->category === 'Climatisation')
@@ -1104,11 +1169,132 @@ function requestDeletion() {
     })
     .then(data => {
         showToast(data.message, 'success');
+
+        @if($object->category === 'Climatisation')
+            // Afficher la réponse du serveur dans la console pour le débogage
+            console.log('Réponse complète du serveur:', JSON.stringify(data));
+            
+            // Mise à jour de la température actuelle si disponible
+            if (data.object.current_temp) {
+                const currentTemp = data.object.current_temp.replace('°C', ''); // Enlever °C s'il existe déjà
+                document.getElementById('current_temp').textContent = currentTemp + '°C';
+                document.getElementById('currentTempDisplay').textContent = currentTemp + '°C';
+            }
+            
+            // Vérifier si la réponse contient la température cible
+            if (data.object.target_temp !== undefined) {
+                // Le serveur retourne la température mais semble ne pas la mettre à jour correctement
+                // On va utiliser la valeur qu'on a envoyée plutôt que celle retournée par le serveur
+                console.log('Target temp from server:', data.object.target_temp);
+                console.log('Using selected temperature instead:', selectedTemperature);
+                
+                // Mettre à jour tous les éléments affichant la température cible
+                document.getElementById('target_temp').textContent = selectedTemperature + '°C';
+                document.getElementById('targetTempDisplay').textContent = selectedTemperature + '°C';
+                document.getElementById('temperatureInput').value = selectedTemperature;
+            } else {
+                // Si le serveur ne renvoie pas la valeur, utiliser celle qu'on a envoyée
+                console.log('Utilisation de la température sélectionnée:', selectedTemperature);
+                document.getElementById('target_temp').textContent = selectedTemperature + '°C';
+                document.getElementById('targetTempDisplay').textContent = selectedTemperature + '°C';
+                document.getElementById('temperatureInput').value = selectedTemperature;
+            }
+        @endif
+
+        showToast('Modifications enregistrées avec succès !');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Une erreur est survenue lors de la mise à jour.', 'error');
+    })
+    .finally(() => {
+        button.disabled = false;
+        spinner.style.display = 'none';
+    });
+}
+
+// Mettre à jour l'affichage des valeurs en temps réel
+document.querySelectorAll('input[type="range"]').forEach(input => {
+    input.addEventListener('input', function() {
+        const valueDisplay = document.getElementById(this.id + 'Value');
+        if (valueDisplay) {
+            valueDisplay.textContent = this.value + (this.id === 'sensitivityInput' ? '' : '%');
+        }
+    });
+});
+
+// Mettre à jour l'affichage de la température en temps réel
+const temperatureInput = document.getElementById('temperatureInput');
+if (temperatureInput) {
+    temperatureInput.addEventListener('input', function() {
+        document.getElementById('targetTempDisplay').textContent = this.value + '°C';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleViewBtn = document.getElementById('toggleViewBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const detailView = document.getElementById('detailView');
+    const editView = document.getElementById('editView');
+
+    // Ensure toggleViewBtn exists before adding event listeners
+    if (toggleViewBtn) {
+        toggleViewBtn.addEventListener('click', function() {
+            detailView.style.display = 'none';
+            editView.style.display = 'block';
+            toggleViewBtn.style.display = 'none';
+        });
+    }
+
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', function() {
+            detailView.style.display = 'block';
+            editView.style.display = 'none';
+            if (toggleViewBtn) {
+                toggleViewBtn.style.display = 'block';
+            }
+        });
+    }
+});
+
+function requestDeletion() {
+    if (!confirm('Êtes-vous sûr de vouloir demander la suppression de cet objet connecté ? Cette action ne peut pas être annulée.')) {
+        return;
+    }
+
+    const button = document.getElementById('requestDeletionButton');
+    button.disabled = true;
+
+    fetch('{{ route("object.request-deletion", $object->id) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ reason: 'Demande utilisateur' })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.message || 'Erreur lors de la demande de suppression');
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        showToast(data.message, 'success');
         setTimeout(() => {
+            window.location.reload();
+        }, 2000);
             window.location.reload();
         }, 2000);
     })
     .catch(error => {
+        console.error('Request error:', error);
+        showToast(error.message || 'Une erreur est survenue lors de la demande de suppression.', 'error');
+    })
+    .finally(() => {
+        button.disabled = false;
         console.error('Request error:', error);
         showToast(error.message || 'Une erreur est survenue lors de la demande de suppression.', 'error');
     })
