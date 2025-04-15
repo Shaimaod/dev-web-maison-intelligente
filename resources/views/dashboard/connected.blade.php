@@ -209,6 +209,24 @@
             </div>
         </div>
     </div>
+    
+    @if(!in_array(Auth::user()->level, ['avancé', 'expert']) && Auth::user()->role !== 'admin')
+    <div class="alert alert-info mt-4">
+        <i class="fas fa-info-circle me-2"></i>
+        Vous pouvez consulter tous les objets connectés. Pour pouvoir les modifier, vous devez atteindre le niveau <strong>avancé</strong>.
+        <div class="mt-2">
+            <strong>Votre niveau actuel :</strong> {{ Auth::user()->level }}
+            <div class="progress mt-1" style="height: 10px;">
+                <div class="progress-bar bg-success" role="progressbar" 
+                     style="width: {{ $nextLevelInfo['progress_percent'] }}%" 
+                     aria-valuenow="{{ $nextLevelInfo['progress_percent'] }}" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100"></div>
+            </div>
+            <small class="text-muted">{{ $nextLevelInfo['points_remaining'] }} points restants pour atteindre le niveau suivant</small>
+        </div>
+    </div>
+    @endif
 </div>
 
 <!-- Modal pour définir l'objectif de consommation d'énergie -->
