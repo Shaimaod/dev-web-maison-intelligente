@@ -204,9 +204,19 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2>{{ $object->name }}</h2>
                     <div>
-                        <button class="btn btn-light" onclick="window.location.href='{{ route('object.edit', $object->id) }}'">
-                            <i class="fas fa-edit"></i> Modifier
+                        <a href="{{ route('dashboard.connected') }}" class="btn btn-light">
+                            <i class="fas fa-arrow-left me-1"></i> Retour
+                        </a>
+                        @can('update', $object)
+                        <button id="toggleViewBtn" class="btn btn-primary ms-2" onclick="toggleView()">
+                            <i class="fas fa-edit me-1"></i>Modifier
                         </button>
+                        @else
+                        <button class="btn btn-secondary ms-2" disabled title="Niveau avancé ou expert requis">
+                            <i class="fas fa-edit me-1"></i>Modifier
+                        </button>
+                        @endcan
+                        
                         @if(auth()->user()->canRequestObjectDeletion())
                             <button type="button" class="btn btn-danger ms-2" onclick="requestDeletion()" id="requestDeletionButton">
                                 <i class="fas fa-trash-alt me-2"></i>Demander la suppression
@@ -373,12 +383,17 @@
                                 </div>
                             @endif
 
-                            <div class="mt-4">
-                                <button type="button" class="btn btn-primary" onclick="updateObject()" id="updateButton">
-                                    <span class="loading-spinner" id="loadingSpinner"></span>
+                            @if(auth()->user()->can('update', $object))
+                                <!-- Boutons et contrôles de modification -->
+                                <button type="button" class="btn btn-primary" id="updateButton" onclick="updateObject()">
                                     <i class="fas fa-save me-2"></i>Enregistrer les modifications
                                 </button>
-                            </div>
+                            @else
+                                <div class="alert alert-info mt-3">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Vous avez besoin d'être au moins de niveau <strong>avancé</strong> pour modifier cet objet.
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -724,6 +739,25 @@ function requestDeletion() {
         button.disabled = false;
     });
 }
+
+// Désactiver les contrôles si l'utilisateur n'a pas les droits
+@if(!auth()->user()->can('update', $object))
+    document.addEventListener('DOMContentLoaded', function() {
+        // Désactiver tous les contrôles de formulaire
+        const formControls = document.querySelectorAll('input, select, button[type="button"]:not(.btn-back)');
+        formControls.forEach(control => {
+            control.disabled = true;
+        });
+    });
+@endif
+
+// Ajouter l'initialisation des tooltips pour l'info-bulle sur le bouton désactivé
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+});
 </script>
 @endpush
 @endsection
