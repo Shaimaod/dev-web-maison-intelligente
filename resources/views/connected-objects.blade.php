@@ -5,12 +5,22 @@
     <div class="container py-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="h3 mb-0">Objets Connectés</h1>
-            @if(auth()->user()->level === 'advanced' || auth()->user()->level === 'expert')
+            @if(auth()->user()->can('create', App\Models\ConnectedObject::class))
             <a href="{{ route('connected.objects.create') }}" class="btn btn-primary">
                 <i class="fas fa-plus me-2"></i>Ajouter un objet
             </a>
             @endif
         </div>
+        
+        <!-- Message informatif pour les utilisateurs débutants et intermédiaires -->
+        @if(!in_array(auth()->user()->level, ['avancé', 'expert']) && auth()->user()->role !== 'admin')
+        <div class="alert alert-info mb-4">
+            <i class="fas fa-info-circle me-2"></i>
+            Vous pouvez consulter tous les objets connectés. Pour pouvoir les modifier, vous devez atteindre le niveau <strong>avancé</strong>.
+            Continuez à utiliser l'application pour gagner des points d'expérience !
+        </div>
+        @endif
+        
         <div class="row g-3 mb-4">
             <div class="col-md-6">
                 <input type="text" 
