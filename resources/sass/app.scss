@@ -1,3 +1,24 @@
+/**
+ * Fichier principal SASS de l'application
+ * 
+ * Ce fichier importe et organise tous les styles SCSS de l'application.
+ * Il combine les variables, les styles Bootstrap personnalisés et
+ * les styles spécifiques à l'application.
+ */
+
+// Importation des variables SCSS pour la personnalisation
+@import 'variables';
+
+// Importation de Bootstrap
+@import 'bootstrap/scss/bootstrap';
+
+/**
+ * Styles personnalisés pour l'application
+ * 
+ * Ces styles s'appliquent à toute l'application et remplacent
+ * ou étendent les styles Bootstrap par défaut.
+ */
+
 // Variables
 $primary-color: #4e73df;
 $secondary-color: #224abe;

@@ -10,8 +10,22 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Contrôleur de gestion des demandes de suppression d'objets
+ * 
+ * Ce contrôleur permet de gérer le processus de demande et 
+ * d'approbation pour la suppression d'objets connectés. Les 
+ * utilisateurs peuvent demander la suppression d'un objet, et 
+ * les administrateurs peuvent approuver ou rejeter ces demandes.
+ */
 class DeletionRequestController extends Controller
 {
+    /**
+     * Affiche la liste des demandes de suppression
+     * Accessible uniquement aux administrateurs
+     * 
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         $requests = DeletionRequest::with(['object', 'user'])
@@ -21,11 +35,24 @@ class DeletionRequestController extends Controller
         return view('admin.deletion-requests.index', compact('requests'));
     }
 
+    /**
+     * Affiche les détails d'une demande de suppression spécifique
+     * 
+     * @param DeletionRequest $request La demande à afficher
+     * @return \Illuminate\View\View
+     */
     public function show(DeletionRequest $request)
     {
         return view('admin.deletion-requests.show', compact('request'));
     }
 
+    /**
+     * Traite une demande de suppression (approuver ou rejeter)
+     * 
+     * @param Request $httpRequest La requête HTTP contenant l'action à effectuer
+     * @param DeletionRequest $deletionRequest La demande de suppression à traiter
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function process(Request $httpRequest, DeletionRequest $deletionRequest)
     {
         $action = $httpRequest->input('action');
@@ -118,6 +145,12 @@ class DeletionRequestController extends Controller
         return redirect()->back()->with('error', 'Action non valide.');
     }
 
+    /**
+     * Crée une nouvelle demande de suppression pour un objet
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function requestDeletion(Request $request, $id)
     {
         try {

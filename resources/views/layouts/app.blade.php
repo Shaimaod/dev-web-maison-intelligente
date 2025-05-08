@@ -1,20 +1,33 @@
-<!doctype html>
+{{-- 
+    Layout principal de l'application
+    
+    Ce fichier définit la structure HTML de base pour toutes les pages.
+    Il inclut les balises meta, les liens vers les feuilles de style,
+    les scripts JavaScript, la barre de navigation et le pied de page.
+    
+    Les vues individuelles étendent ce layout et insèrent leur contenu
+    dans la section 'content'.
+--}}
+
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
+{{-- Informations de base du document --}}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Application de gestion de maison intelligente">
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Connect’Toit') }}</title>
 
-    <!-- Fonts -->
+    {{-- Polices externes et bibliothèques CSS --}}
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-    <!-- Scripts -->
+    {{-- Scripts compilés et CSS via Vite --}}
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <style>
         :root {
@@ -70,18 +83,22 @@
 </head>
 <body>
     <div id="app">
+{{-- Barre de navigation principale --}}
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
                 <!-- Redirige vers le tableau de bord connecté si l'utilisateur est authentifié -->
                 <a class="navbar-brand" href="{{ Auth::check() ? route('dashboard.connected') : url('/') }}">
                     {{ config('app.name', 'Connect’Toit') }}
                 </a>
+
+                {{-- Bouton hamburger pour la navigation mobile --}}
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
+{{-- Contenu de la barre de navigation --}}
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <!-- Left Side Of Navbar -->
+                    {{-- Liens de navigation à gauche --}}
                     <ul class="navbar-nav me-auto">
                         @guest
                             <li class="nav-item">
@@ -92,28 +109,32 @@
                         @endguest
                     </ul>
 
-                    <!-- Right Side Of Navbar -->
+                    {{-- Liens de navigation à droite --}}
                     <ul class="navbar-nav ms-auto">
-                        <!-- Authentication Links -->
+                        {{-- Liens d'authentification dynamiques --}}
                         @guest
+{{-- Liens pour les utilisateurs non connectés --}}
                             @if (Route::has('login'))
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
                                 </li>
                             @endif
 
+{{-- Lien d'inscription si activé --}}
                             @if (Route::has('register'))
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
                                 </li>
                             @endif
                         @else
-                            <!-- Dropdown menu for authenticated users -->
+                            {{-- Menu utilisateur pour les personnes connectées --}}
                             <li class="nav-item dropdown">
+{{-- Bouton du menu déroulant --}}
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                     {{ Auth::user()->name }}
                                 </a>
 
+{{-- Contenu du menu déroulant --}}
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                     <!-- Admin Dashboard Link (only visible to admins) -->
                                     @if(Auth::user()->role === 'admin') <!-- Check if user is admin -->
@@ -148,6 +169,7 @@
             </div>
         </nav>
 
+{{-- Contenu principal de la page --}}
         <main class="py-4">
             @yield('content')
         </main>

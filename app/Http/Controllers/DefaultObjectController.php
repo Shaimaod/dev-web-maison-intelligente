@@ -8,10 +8,27 @@ use App\Models\House;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Contrôleur de gestion des objets connectés par défaut
+ * 
+ * Ce contrôleur permet de créer rapidement des objets connectés
+ * avec des paramètres prédéfinis pour faciliter l'utilisation
+ * de l'application par les nouveaux utilisateurs.
+ */
 class DefaultObjectController extends Controller
 {
     /**
      * Crée un objet par défaut et redirige vers la page d'édition
+     * 
+     * Cette méthode:
+     * - Vérifie si l'utilisateur possède une maison
+     * - Crée une maison par défaut si nécessaire
+     * - Crée un nouvel objet avec des paramètres prédéfinis
+     * - Enregistre l'activité dans les logs
+     * - Redirige vers la page d'édition de l'objet
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function createDefault(Request $request)
     {

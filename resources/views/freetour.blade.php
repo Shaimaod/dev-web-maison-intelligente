@@ -1,3 +1,11 @@
+{{--
+    Vue de la visite libre des objets connectés
+    
+    Cette page permet aux visiteurs de parcourir le catalogue
+    d'objets connectés disponibles dans l'application.
+    Elle utilise Vue.js pour le filtrage et l'affichage dynamique.
+--}}
+
 @extends('layouts.app')
 
 @section('content')
@@ -18,7 +26,7 @@
                     <select class="form-select" v-model="category" @change="fetchObjects">
                         <option value="">Toutes les catégories</option>
                         <option value="Éclairage">Éclairage</option>
-                        <option value="Climatisation">Climatisation</option>
+                        <option value="Climatisation">Climatisation</option> 
                         <option value="Sécurité">Sécurité</option>
                         <option value="Électroménager">Électroménager</option>
                         <option value="Audio">Audio</option>

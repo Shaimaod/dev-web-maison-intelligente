@@ -1,3 +1,12 @@
+/**
+ * Fichier principal JavaScript de l'application
+ * 
+ * Ce fichier initialise l'application JavaScript côté client.
+ * Il importe les dépendances nécessaires, configure Vue.js et instancie l'application.
+ * Les composants Vue, les directives et autres configurations sont définies ici.
+ */
+
+// Importation des dépendances requises pour l'application
 import './bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap';

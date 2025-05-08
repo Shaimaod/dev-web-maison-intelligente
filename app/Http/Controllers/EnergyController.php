@@ -12,12 +12,24 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
+/**
+ * Contrôleur de gestion de la consommation énergétique
+ * 
+ * Ce contrôleur permet de gérer tout ce qui concerne l'énergie:
+ * - Définition des objectifs de consommation
+ * - Suivi de la consommation énergétique
+ * - Génération de rapports d'historique et de détails
+ * - Simulation de consommation pour les démonstrations
+ */
 class EnergyController extends Controller
 {
     use LogsUserActivity;
 
     /**
      * Définir un objectif de consommation d'énergie
+     * 
+     * @param Request $request La requête contenant l'objectif énergétique
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function setGoal(Request $request)
     {
@@ -51,6 +63,9 @@ class EnergyController extends Controller
 
     /**
      * Afficher l'historique de consommation d'énergie
+     * Génère des graphiques journaliers et mensuels
+     * 
+     * @return \Illuminate\View\View
      */
     public function history()
     {
@@ -112,6 +127,8 @@ class EnergyController extends Controller
 
     /**
      * Afficher les détails de consommation par appareil
+     * 
+     * @return \Illuminate\View\View
      */
     public function details()
     {
@@ -204,7 +221,7 @@ class EnergyController extends Controller
     /**
      * Assigne des valeurs de consommation déterministes à tous les objets
      * Assure la cohérence avec les calculs du tableau de bord
-     */
+          */
     private function assignDeterministicConsumption($objects)
     {
         foreach ($objects as $object) {

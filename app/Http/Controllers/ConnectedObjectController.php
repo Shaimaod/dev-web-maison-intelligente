@@ -13,10 +13,24 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
+/**
+ * Contrôleur de gestion des objets connectés
+ *
+ * Ce contrôleur gère toutes les opérations liées aux objets connectés:
+ * - L'affichage et la recherche d'objets
+ * - La création et modification d'objets
+ * - La suppression d'objets
+ * - L'affichage des statistiques et détails d'objets
+ * - La gestion des États et paramètres des objets
+ */
 class ConnectedObjectController extends Controller
 {
     use LogsUserActivity;
 
+/**
+     * Constructeur définissant les middlewares d'autorisation
+     * Vérifie les permissions avant chaque opération de modification
+     */
     public function __construct()
     {
         // Appliquer l'autorisation aux actions de modification
@@ -36,7 +50,9 @@ class ConnectedObjectController extends Controller
         })->except(['index', 'dashboardConnected', 'showConnectedObjects', 'getObjects', 'show']);
     }
 
-    // Méthode pour afficher la vue de recherche des objets connectés pour freetour
+    /**
+     * Affiche la page de recherche des objets connectés (mode visite libre)
+     */
     public function index()
     {
         return view('freetour');  // Vue pour freetour
@@ -51,7 +67,10 @@ class ConnectedObjectController extends Controller
         return view('connected-objects.create');
     }
 
-    // Méthode pour afficher la vue de recherche des objets connectés pour dashboard.connected
+    /**
+     * Affiche la page du tableau de bord des objets connectés
+     * Calcule les statistiques de consommation d'énergie
+     */
     public function dashboardConnected()
     {
         $user = Auth::user();
@@ -322,7 +341,9 @@ class ConnectedObjectController extends Controller
         return view('connected-objects');  // La vue sera connectée à Vue.js
     }
 
-    // Méthode pour récupérer les objets filtrés via l'API
+    /**
+     * API pour récupérer les objets connectés (filtrage, recherche...)
+     */
     public function getObjects(Request $request)
     {
         // Vérifier si des paramètres de recherche sont fournis
@@ -394,7 +415,9 @@ class ConnectedObjectController extends Controller
         return response()->json($objects);
     }
 
-    // Méthode pour ajouter un nouvel objet connecté
+    /**
+     * Enregistre un nouvel objet connecté
+*/
     public function store(Request $request)
     {
         $request->validate([
@@ -626,6 +649,9 @@ class ConnectedObjectController extends Controller
             ->with('success', 'Objet connecté mis à jour avec succès.');
     }
 
+/**
+     * Supprime un objet connecté
+     */
     public function destroy($id)
     {
         try {

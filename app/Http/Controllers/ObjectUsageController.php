@@ -7,8 +7,21 @@ use App\Models\ObjectUsage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Contrôleur de gestion de l'utilisation des objets connectés
+ * 
+ * Ce contrôleur permet de suivre et d'analyser l'utilisation
+ * des objets connectés, notamment leur consommation énergétique,
+ * leur efficacité et leurs besoins de maintenance.
+ */
 class ObjectUsageController extends Controller
 {
+    /**
+     * Affiche l'historique d'utilisation d'un objet connecté
+     * 
+     * @param ConnectedObject $object L'objet dont on veut voir l'utilisation
+     * @return \Illuminate\View\View
+     */
     public function index(ConnectedObject $object)
     {
         // Vérifier si l'utilisateur a accès à l'objet
@@ -31,6 +44,13 @@ class ObjectUsageController extends Controller
         return view('object-usage.index', compact('object', 'usages', 'stats'));
     }
 
+    /**
+     * Enregistre une nouvelle utilisation d'un objet connecté
+     * 
+     * @param Request $request La requête contenant les données d'utilisation
+     * @param ConnectedObject $object L'objet concerné
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request, ConnectedObject $object)
     {
         // Vérifier si l'utilisateur a accès à l'objet
@@ -57,6 +77,13 @@ class ObjectUsageController extends Controller
         return redirect()->back()->with('success', 'Données d\'utilisation enregistrées avec succès.');
     }
 
+    /**
+     * Génère un rapport détaillé d'utilisation d'un objet
+     * Inclut les statistiques quotidiennes, hebdomadaires et mensuelles
+     * 
+     * @param ConnectedObject $object L'objet pour lequel générer le rapport
+     * @return \Illuminate\View\View
+     */
     public function report(ConnectedObject $object)
     {
         // Vérifier si l'utilisateur a accès à l'objet
@@ -85,4 +112,4 @@ class ObjectUsageController extends Controller
 
         return view('object-usage.report', compact('object', 'dailyStats', 'weeklyStats'));
     }
-} 
+}

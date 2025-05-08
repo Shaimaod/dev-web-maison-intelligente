@@ -8,9 +8,24 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\ActivityLog;
 
+/**
+ * Contrôleur de gestion des profils utilisateurs
+ * 
+ * Ce contrôleur gère toutes les fonctionnalités liées aux profils:
+ * - Affichage et modification du profil
+ * - Changement de mot de passe
+ * - Suivi des activités de l'utilisateur
+ * - Calcul et attribution des niveaux d'expérience
+ * - Recherche des utilisateurs (pour les administrateurs)
+ */
 class ProfileController extends Controller
 {
-    // Afficher le profil de l'utilisateur
+    /**
+     * Affiche le profil de l'utilisateur
+* Calcule et met à jour son niveau en fonction des points accumulés
+     * 
+     * @return \Illuminate\View\View
+     */
     public function show()
     {
         // Obtenir les informations de l'utilisateur connecté
@@ -34,7 +49,14 @@ class ProfileController extends Controller
         return view('profile.show', compact('user'));
     }
 
-    // Mettre à jour le profil de l'utilisateur
+    /**
+     * Met à jour le profil de l'utilisateur
+* Valide les données avec des règles strictes de sécurité
+     * Ajoute des points d'expérience pour la mise à jour du profil
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function update(Request $request)
     {
         // Valider les données du formulaire avec des règles plus strictes
@@ -134,7 +156,11 @@ class ProfileController extends Controller
     }
 
     /**
-     * Rechercher des profils d'utilisateurs
+     * Recherche des profils d'utilisateurs
+* Accessible uniquement aux administrateurs
+     * 
+     * @param Request $request
+     * @return \Illuminate\View\View|\Illuminate\Http\JsonResponse
      */
     public function search(Request $request)
     {
