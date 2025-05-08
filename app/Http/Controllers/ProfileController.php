@@ -152,6 +152,9 @@ class ProfileController extends Controller
                     'user_agent' => $request->userAgent()
                 ]
             ]);
+            
+            // Ajouter des points pour la recherche de profils
+            auth()->user()->addPoints('profile_search');
         }
         
         $users = User::when($query, function($q) use ($query) {
@@ -194,16 +197,42 @@ class ProfileController extends Controller
     }
 
     /**
-     * Afficher l'historique des activités de l'utilisateur
+     * Affiche l'historique des activités de l'utilisateur
      */
-    public function activity()
+    public function activity(Request $request, $userId = null)
     {
-        $user = Auth::user();
-        $activities = $user->activityLogs()
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        // Si un ID utilisateur est fourni et que l'utilisateur actuel est admin
+        if ($userId && Auth::user()->isAdmin()) {
+            $user = User::findOrFail($userId);
+        } else {
+            $user = Auth::user();
+        }
 
-        return view('profile.activity', compact('activities', 'user'));
+        // Pagination manuelle pour éviter les problèmes de duplication
+        $page = $request->input('page', 1);
+        $perPage = 10; // Nombre d'activités par page
+        
+        $query = ActivityLog::where('user_id', $user->id)
+                 ->orderBy('created_at', 'desc')
+                 ->orderBy('id', 'desc'); // Ajouter un ordre secondaire pour la cohérence
+        
+        $total = $query->count();
+        
+        // Utiliser skip/take pour une pagination manuelle précise
+        $activities = $query->skip(($page - 1) * $perPage)
+                           ->take($perPage)
+                           ->get();
+        
+        if ($request->ajax()) {
+            // En cas de requête AJAX, retourner seulement les activités pour le "charger plus"
+            return view('profile.activity-items', compact('activities'));
+        }
+
+        // Calculer s'il y a plus de pages
+        $hasMorePages = $total > ($page * $perPage);
+        $currentPage = $page;
+        
+        return view('profile.activity', compact('user', 'activities', 'hasMorePages', 'currentPage', 'total'));
     }
 
     public function searchProfiles(Request $request)

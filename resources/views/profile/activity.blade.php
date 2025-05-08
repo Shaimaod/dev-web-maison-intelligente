@@ -224,7 +224,6 @@
     <div class="activity-card">
         <div class="activity-header">
             <h2>
-                <i class="fas fa-history me-2"></i>
                 Historique des activités
                 @if(Auth::id() !== $user->id)
                     - {{ $user->name }} {{ $user->surname }}
@@ -253,149 +252,18 @@
                                 <th>Détails</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @foreach($activities as $activity)
-                                <tr>
-                                    <td>{{ $activity->created_at->format('d/m/Y H:i') }}</td>
-                                    <td>
-                                        @switch($activity->action_type)
-                                            @case('login')
-                                                <span class="activity-badge badge-login">
-                                                    <i class="fas fa-sign-in-alt me-1"></i>Connexion
-                                                </span>
-                                                @break
-                                            @case('logout')
-                                                <span class="activity-badge badge-logout">
-                                                    <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
-                                                </span>
-                                                @break
-                                            @case('search')
-                                                <span class="activity-badge badge-search">
-                                                    <i class="fas fa-search me-1"></i>Recherche
-                                                </span>
-                                                @break
-                                            @case('profile_update')
-                                                <span class="activity-badge badge-profile">
-                                                    <i class="fas fa-user-edit me-1"></i>Profil
-                                                </span>
-                                                @break
-                                            @case('object_add')
-                                            @case('object_update')
-                                            @case('object_delete')
-                                                <span class="activity-badge badge-object">
-                                                    <i class="fas fa-plug me-1"></i>Objet
-                                                </span>
-                                                @break
-                                            @case('deletion_request')
-                                                <span class="activity-badge badge-object">
-                                                    <i class="fas fa-trash-alt me-1"></i>Demande de suppression
-                                                </span>
-                                                @break
-                                            @case('object_deletion_requested')
-                                                <span class="activity-badge badge-object">
-                                                    <i class="fas fa-trash-alt me-1"></i>Demande de suppression
-                                                </span>
-                                                @break
-                                            @default
-                                                <span class="activity-badge badge-default">
-                                                    <i class="fas fa-info-circle me-1"></i>{{ ucfirst($activity->action_type) }}
-                                                </span>
-                                        @endswitch
-                                    </td>
-                                    <td>{{ $activity->description }}</td>
-                                    <td>
-                                        @if($activity->details)
-                                            <button type="button" class="details-button" data-bs-toggle="modal" data-bs-target="#detailsModal{{ $activity->id }}">
-                                                <i class="fas fa-info-circle me-1"></i>Voir les détails
-                                            </button>
-
-                                            <!-- Modal -->
-                                            <div class="modal fade" id="detailsModal{{ $activity->id }}" tabindex="-1" aria-labelledby="detailsModalLabel{{ $activity->id }}" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="detailsModalLabel{{ $activity->id }}">
-                                                                <i class="fas fa-info-circle me-2"></i>Détails de l'activité
-                                                            </h5>
-                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <h5>Détails de l'activité</h5>
-                                                            @php
-                                                                // Correction du traitement des détails pour s'assurer qu'ils sont bien convertis
-                                                                $details = null;
-                                                                
-                                                                if (isset($activity->details)) {
-                                                                    if (is_string($activity->details)) {
-                                                                        $details = json_decode($activity->details, true);
-                                                                    } else {
-                                                                        $details = $activity->details;
-                                                                    }
-                                                                }
-                                                            @endphp
-                                                            
-                                                            @if(!empty($details))
-                                                                <ul class="details-list">
-                                                                    @foreach($details as $key => $value)
-                                                                        @if($key === 'changes')
-                                                                            <li><strong>Modifications:</strong>
-                                                                                <ul>
-                                                                                    @php
-                                                                                        $changes = is_string($value) ? json_decode($value, true) : $value;
-                                                                                    @endphp
-                                                                                    
-                                                                                    @if(is_array($changes))
-                                                                                        @foreach($changes as $fieldKey => $change)
-                                                                                            @if(is_array($change) && isset($change['from']) && isset($change['to']))
-                                                                                                <li>{{ ucfirst($fieldKey) }}: 
-                                                                                                    {{ is_array($change['from']) ? json_encode($change['from']) : $change['from'] }} 
-                                                                                                    → 
-                                                                                                    {{ is_array($change['to']) ? json_encode($change['to']) : $change['to'] }}
-                                                                                                </li>
-                                                                                            @endif
-                                                                                        @endforeach
-                                                                                    @else
-                                                                                        <li>Aucune modification détaillée disponible</li>
-                                                                                    @endif
-                                                                                </ul>
-                                                                            </li>
-                                                                        @elseif(!is_array($value))
-                                                                            <li><strong>{{ ucfirst(str_replace('_', ' ', $key)) }}:</strong> {{ $value }}</li>
-                                                                        @elseif(is_array($value))
-                                                                            <li>
-                                                                                <strong>{{ ucfirst(str_replace('_', ' ', $key)) }}:</strong>
-                                                                                <ul>
-                                                                                    @foreach($value as $subKey => $subValue)
-                                                                                        @if(!is_array($subValue))
-                                                                                            <li>{{ ucfirst(str_replace('_', ' ', $subKey)) }}: {{ $subValue }}</li>
-                                                                                        @endif
-                                                                                    @endforeach
-                                                                                </ul>
-                                                                            </li>
-                                                                        @endif
-                                                                    @endforeach
-                                                                </ul>
-                                                            @else
-                                                                <p class="text-muted">Aucun détail disponible pour cette activité.</p>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @else
-                                            <span class="text-muted">Aucun détail</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
+                        <tbody id="activity-table-body">
+                            @include('profile.activity-items')
                         </tbody>
                     </table>
                 </div>
 
                 <div class="load-more">
-                    <button class="load-more-button" id="loadMoreButton">
+                    <button class="load-more-button" id="loadMoreButton" data-page="{{ $currentPage + 1 }}" {{ !$hasMorePages ? 'style=display:none' : '' }}>
                         Charger plus d'activités
-                        <span class="loading-spinner" id="loadingSpinner"></span>
+                        <div class="spinner-border spinner-border-sm text-light" role="status" style="display: none;" id="loadingSpinner">
+                            <span class="visually-hidden">Chargement...</span>
+                        </div>
                     </button>
                 </div>
             @endif
@@ -406,26 +274,29 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        let currentPage = 1;
         const loadMoreButton = document.getElementById('loadMoreButton');
         const loadingSpinner = document.getElementById('loadingSpinner');
+        const tableBody = document.getElementById('activity-table-body');
+        
         let isLoading = false;
-        let hasMorePages = true;
-
-        if (loadMoreButton) {
-            loadMoreButton.addEventListener('click', loadMoreActivities);
+        let lastLoadedId = null;
+        
+        // Récupérer le dernier ID chargé pour éviter les doublons
+        const activityRows = document.querySelectorAll('.activity-item');
+        if (activityRows.length > 0) {
+            lastLoadedId = activityRows[activityRows.length - 1].dataset.id;
         }
-
-        function loadMoreActivities() {
-            if (isLoading || !hasMorePages) return;
-
+        
+        loadMoreButton.addEventListener('click', function() {
+            if (isLoading) return;
+            
             isLoading = true;
             loadMoreButton.disabled = true;
             loadingSpinner.style.display = 'inline-block';
-
-            currentPage++;
-
-            fetch(`{{ route('profile.activity', ['user' => $user->id]) }}?page=${currentPage}`, {
+            
+            const nextPage = parseInt(loadMoreButton.dataset.page);
+            
+            fetch(`{{ route('profile.activity', ['user' => $user->id]) }}?page=${nextPage}`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
@@ -434,13 +305,33 @@
             .then(html => {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
-                const newRows = doc.querySelectorAll('.activity-table tbody tr');
+                
+                // Check if we got new rows
+                const newRows = doc.querySelectorAll('.activity-item');
                 
                 if (newRows.length > 0) {
-                    const tbody = document.querySelector('.activity-table tbody');
-                    newRows.forEach(row => tbody.appendChild(row.cloneNode(true)));
+                    // Append new rows to table
+                    const fragment = document.createDocumentFragment();
+                    let newRowsAdded = false;
+                    
+                    newRows.forEach(row => {
+                        const rowId = row.dataset.id;
+                        // Only add rows we don't already have
+                        if (!document.querySelector(`.activity-item[data-id="${rowId}"]`)) {
+                            fragment.appendChild(row.cloneNode(true));
+                            newRowsAdded = true;
+                        }
+                    });
+                    
+                    if (newRowsAdded) {
+                        tableBody.appendChild(fragment);
+                        loadMoreButton.dataset.page = nextPage + 1;
+                    } else {
+                        // If all rows were duplicates, we're at the end
+                        loadMoreButton.style.display = 'none';
+                    }
                 } else {
-                    hasMorePages = false;
+                    // No more rows to show
                     loadMoreButton.style.display = 'none';
                 }
             })
@@ -452,7 +343,7 @@
                 loadMoreButton.disabled = false;
                 loadingSpinner.style.display = 'none';
             });
-        }
+        });
     });
 </script>
 @endpush

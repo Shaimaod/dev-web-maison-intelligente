@@ -38,6 +38,13 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
                 'password' => Hash::make('password'),
                 'remember_token' => Str::random(10),
+                'surname' => 'User',
+                'username' => 'testuser',
+                'gender' => 'other',
+                'birthdate' => '1995-01-01',
+                'member_type' => 'child',
+                'level' => 'débutant',
+                'points' => 0
             ]
         );
 

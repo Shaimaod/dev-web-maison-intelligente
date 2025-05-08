@@ -347,6 +347,9 @@ class ConnectedObjectController extends Controller
                 'description' => 'Recherche d\'objets connectés',
                 'details' => $searchDetails
             ]);
+            
+            // Ajouter des points pour la recherche d'objets
+            auth()->user()->addPoints('object_search');
         }
 
         $validated = $request->validate([
@@ -378,8 +381,15 @@ class ConnectedObjectController extends Controller
             $query->where('status', $request->input('status'));
         }
 
+        // Ajouter un tri explicite pour assurer que les résultats sont dans un ordre cohérent
+        // et éviter les duplications lors de la pagination
+        $query->orderBy('created_at', 'desc')
+              ->orderBy('id', 'desc');
+
         $perPage = $request->input('per_page', 12);
-        $objects = $query->paginate($perPage);
+        
+        // Utiliser une valeur unique pour la clé de la page pour éviter les conflits de cache
+        $objects = $query->paginate($perPage)->appends($request->except('page'));
 
         return response()->json($objects);
     }
@@ -518,6 +528,11 @@ class ConnectedObjectController extends Controller
                 'description' => 'Modification d\'un objet connecté',
                 'details' => $changes
             ]);
+            
+            // Ajouter des points pour la modification d'un objet
+            if (!empty($changes) && auth()->check()) {
+                auth()->user()->addPoints('object_update');
+            }
 
             return response()->json([
                 'message' => 'Objet connecté mis à jour avec succès',
@@ -599,7 +614,12 @@ class ConnectedObjectController extends Controller
                     'object_category' => $object->category,
                     'changes' => $changes,
                 ]
-            ]); // Correction ici : fermeture correcte du tableau et de la méthode create()
+            ]);
+            
+            // Ajouter des points pour la modification d'un objet
+            if (auth()->check()) {
+                auth()->user()->addPoints('object_update');
+            }
         }
 
         return redirect()->route('object.edit', $object->id)
