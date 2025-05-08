@@ -6,8 +6,21 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 
+/**
+ * Contrôleur de gestion du système d'expérience utilisateur
+ * 
+ * Ce contrôleur permet de configurer et gérer le système d'expérience
+ * qui permet aux utilisateurs de progresser en niveaux en fonction
+ * de leurs interactions avec l'application.
+ */
 class ExperienceController extends Controller
 {
+    /**
+     * Affiche la page de configuration du système d'expérience
+     * Accessible uniquement aux administrateurs
+     * 
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         $users = User::all();
@@ -30,6 +43,13 @@ class ExperienceController extends Controller
         return view('admin.experience.index', compact('users', 'points', 'levels'));
     }
 
+    /**
+     * Met à jour les points attribués pour différentes actions
+     * et les seuils des niveaux d'expérience
+     * 
+     * @param Request $request La requête contenant les nouvelles valeurs
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updatePoints(Request $request)
     {
         $validated = $request->validate([
@@ -60,6 +80,13 @@ class ExperienceController extends Controller
             ->with('success', 'Les points d\'expérience ont été mis à jour avec succès.');
     }
 
+    /**
+     * Met à jour manuellement les points d'un utilisateur spécifique
+     * 
+     * @param Request $request La requête contenant les nouveaux points
+     * @param User $user L'utilisateur à modifier
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updateUserPoints(Request $request, User $user)
     {
         $validated = $request->validate([

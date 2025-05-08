@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * Routes Web - Définit toutes les routes accessibles via le navigateur
+ *
+ * Ce fichier contient toutes les routes principales de l'application :
+ * - Routes publiques (accueil, authentification)
+ * - Routes protégées nécessitant une authentification
+ * - Routes administratives
+ * - Routes de gestion des profils utilisateurs
+ * - Routes de gestion des objets connectés
+ */
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\HomeController;
