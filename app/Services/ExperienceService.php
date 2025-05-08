@@ -54,6 +54,7 @@ class ExperienceService
             'object_added' => 'object_added',
             'object_update' => 'object_update',
             'object_search' => 'object_search',
+            'profile_search' => 'profile_search',
             'status_change' => 'status_change'
         ];
         

@@ -15,6 +15,9 @@ class ExperienceController extends Controller
             'object_added' => env('EXPERIENCE_POINTS_OBJECT_ADDED', 10),
             'profile_update' => env('EXPERIENCE_POINTS_PROFILE_UPDATE', 5),
             'login' => env('EXPERIENCE_POINTS_LOGIN', 1),
+            'object_search' => env('EXPERIENCE_POINTS_OBJECT_SEARCH', 1),
+            'profile_search' => env('EXPERIENCE_POINTS_PROFILE_SEARCH', 1),
+            'object_update' => env('EXPERIENCE_POINTS_OBJECT_UPDATE', 3),
         ];
 
         $levels = [
@@ -33,6 +36,9 @@ class ExperienceController extends Controller
             'object_added' => 'required|integer|min:0',
             'profile_update' => 'required|integer|min:0',
             'login' => 'required|integer|min:0',
+            'object_search' => 'required|integer|min:0',
+            'profile_search' => 'required|integer|min:0',
+            'object_update' => 'required|integer|min:0',
             'beginner' => 'required|integer|min:0',
             'intermediate' => 'required|integer|min:0',
             'advanced' => 'required|integer|min:0',
@@ -66,4 +72,4 @@ class ExperienceController extends Controller
         return redirect()->route('admin.experience')
             ->with('success', 'Les points de l\'utilisateur ont été mis à jour avec succès.');
     }
-} 
+}

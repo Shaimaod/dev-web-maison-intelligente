@@ -27,6 +27,18 @@
                         <label class="form-label">Points pour la connexion</label>
                         <input type="number" class="form-control" name="login" value="{{ $points['login'] }}" min="0">
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Points pour la recherche d'objets</label>
+                        <input type="number" class="form-control" name="object_search" value="{{ $points['object_search'] }}" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Points pour la recherche de profils</label>
+                        <input type="number" class="form-control" name="profile_search" value="{{ $points['profile_search'] }}" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Points pour la modification d'objets</label>
+                        <input type="number" class="form-control" name="object_update" value="{{ $points['object_update'] }}" min="0">
+                    </div>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save me-2"></i>Enregistrer les modifications
                     </button>
@@ -129,4 +141,4 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection
