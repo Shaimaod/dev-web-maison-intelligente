@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class ExperienceService
 {
@@ -20,13 +21,12 @@ class ExperienceService
         $configKey = $this->getConfigKeyForAction($action);
         
         // Récupérer le nombre de points pour cette action
-        $points = config("experience.points.{$configKey}", 0);
+        // On évite le cache de config pour être sûr d'avoir les dernières valeurs
+        $envKey = 'EXPERIENCE_POINTS_' . strtoupper($action);
+        $points = (int)env($envKey, 0);
         
-        if ($points <= 0) {
-            // Si aucun point n'est configuré, on utilise les valeurs de .env directement
-            $envKey = 'EXPERIENCE_POINTS_' . strtoupper($action);
-            $points = (int)env($envKey, 0);
-        }
+        // Log pour debugging
+        Log::debug("Attribution de points pour l'action '{$action}', points configurés: {$points}");
         
         if ($points > 0) {
             Log::info("Attribution de {$points} points à l'utilisateur #{$user->id} pour l'action {$action}");

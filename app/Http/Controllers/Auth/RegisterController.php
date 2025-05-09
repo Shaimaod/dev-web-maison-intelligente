@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\URL;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use App\Models\AuthorizedUser;
 
 class RegisterController extends Controller
 {
@@ -37,7 +38,19 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'surname' => ['nullable', 'string', 'max:255'],
             'username' => ['nullable', 'string', 'max:255', 'unique:users'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => [
+                'required', 
+                'string', 
+                'email', 
+                'max:255', 
+                'unique:users',
+                function ($attribute, $value, $fail) {
+                    // Vérifier si l'email est autorisé à s'inscrire
+                    if (!AuthorizedUser::where('email', $value)->exists()) {
+                        $fail("L'adresse e-mail n'est pas autorisée à s'inscrire. Veuillez contacter l'administrateur.");
+                    }
+                },
+            ],
             'gender' => ['nullable', 'string'],
             'birthdate' => ['required', 'date'],
             'member_type' => ['required', 'string'],
