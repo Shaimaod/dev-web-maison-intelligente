@@ -8,11 +8,26 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <!-- Formulaire d'ajout -->
     <form method="POST" action="{{ route('authorized-users.store') }}" class="row g-3 mb-4">
         @csrf
         <div class="col-md-8">
-            <input type="email" name="email" class="form-control" placeholder="ex: parent@example.com" required>
+            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" 
+                   value="{{ old('email') }}" placeholder="ex: parent@example.com" required>
         </div>
         <div class="col-md-4">
             <button type="submit" class="btn btn-primary w-100">Ajouter</button>

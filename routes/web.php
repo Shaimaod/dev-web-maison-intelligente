@@ -123,6 +123,20 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
+| Routes pour la gestion des emails autorisés (accessible uniquement aux admins)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/authorized-users', [App\Http\Controllers\AuthorizedUserController::class, 'index'])
+         ->name('authorized-users.index');
+    Route::post('/admin/authorized-users', [App\Http\Controllers\AuthorizedUserController::class, 'store'])
+         ->name('authorized-users.store');
+    Route::delete('/admin/authorized-users/{id}', [App\Http\Controllers\AuthorizedUserController::class, 'destroy'])
+         ->name('authorized-users.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
 | Route de Vérification de l'Email
 |--------------------------------------------------------------------------
 | Cette route permet à l'utilisateur de cliquer sur le lien envoyé pour vérifier leur email.
@@ -145,7 +159,17 @@ Route::get('email/verify/{id}/{hash}', function ($id, $hash) {
 
     // Vérifier si le hash correspond à l'email de l'utilisateur
     if (sha1($user->getEmailForVerification()) === $hash) {
-        $user->markEmailAsVerified(); // Marque l'email comme vérifié
+        if (!$user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified(); // Marque l'email comme vérifié
+            
+            // Débogage pour confirmer la mise à jour
+            \Illuminate\Support\Facades\Log::info("Email vérifié pour l'utilisateur: " . $user->id . " à " . now()->toDateTimeString());
+            
+            // S'assurer que la colonne email_verified_at est bien mise à jour
+            \Illuminate\Support\Facades\DB::table('users')
+                ->where('id', $user->id)
+                ->update(['email_verified_at' => now()]);
+        }
         return redirect('/home')->with('status', 'Votre email a été vérifié !');
     }
 

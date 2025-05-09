@@ -21,7 +21,13 @@ class LogUserActivity
 
         try {
             if (auth()->check()) {
+                $user = auth()->user();
                 file_put_contents(storage_path('logs/laravel.log'), "User is authenticated: " . auth()->id() . "\n", FILE_APPEND);
+                
+                // Ajouter du débogage pour l'état de la vérification de l'email
+                $emailVerifiedStatus = $user->hasVerifiedEmail() ? 'verified' : 'not verified';
+                $emailVerifiedAt = $user->email_verified_at ? $user->email_verified_at->toDateTimeString() : 'null';
+                file_put_contents(storage_path('logs/laravel.log'), "Email verification status: " . $emailVerifiedStatus . ", email_verified_at: " . $emailVerifiedAt . "\n", FILE_APPEND);
 
                 if (!session()->has('logged_in')) {
                     file_put_contents(storage_path('logs/laravel.log'), "Attempting to log user login: " . auth()->id() . "\n", FILE_APPEND);
@@ -35,7 +41,8 @@ class LogUserActivity
                                 'ip' => $request->ip(),
                                 'user_agent' => $request->userAgent(),
                                 'timestamp' => now()->toDateTimeString(),
-                                'route' => $request->route() ? $request->route()->getName() : 'unknown'
+                                'route' => $request->route() ? $request->route()->getName() : 'unknown',
+                                'email_verified' => $user->hasVerifiedEmail()
                             ],
                             'ip_address' => $request->ip(),
                             'user_agent' => $request->userAgent()
@@ -102,4 +109,4 @@ class LogUserActivity
 
         file_put_contents(storage_path('logs/laravel.log'), "LogUserActivity terminate method completed\n", FILE_APPEND);
     }
-} 
+}
